@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+
+  .app-theme.light {
+    --bg: #ffffff;
+    --panel: #fafafa;
+    --text: #1a1a1a;
+    --muted: #6b7280;
+    --accent: #f43f5e;
+    --accent-soft: rgba(244, 63, 94, 0.12);
+    --danger: #dc2626;
+    --danger-bg: #fee2e2;
+    --warning: #ea580c;
+    --warning-bg: #ffedd5;
+    --success: #16a34a;
+    --success-bg: #dcfce7;
+    --border: #ececec;
+  }
+
+  .app-theme.dark {
+    --bg: #161225;
+    --panel: #1c1730;
+    --text: #f2effa;
+    --muted: #a9a3c2;
+    --accent: #f472b6;
+    --accent-soft: rgba(244, 114, 182, 0.18);
+    --danger: #f87171;
+    --danger-bg: rgba(248, 113, 113, 0.14);
+    --warning: #fbbf24;
+    --warning-bg: rgba(251, 191, 36, 0.14);
+    --success: #34d399;
+    --success-bg: rgba(52, 211, 153, 0.14);
+    --border: rgba(255, 255, 255, 0.1);
+  }
+
+  .app-theme {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .btn {
+    @apply border-none cursor-pointer rounded-lg px-4 py-2 text-sm font-medium bg-[var(--accent)] text-white transition-all hover:opacity-90;
+  }
+
+  .btn-outline {
+    @apply bg-transparent border border-[var(--border)] text-[var(--text)] hover:bg-[var(--panel)];
+  }
+
+  .input {
+    @apply w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--panel)] text-[var(--text)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent;
+  }
+
+  .card {
+    @apply border border-[var(--border)] rounded-xl p-4 bg-[var(--panel)];
+  }
+
+  .spinner {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+}
