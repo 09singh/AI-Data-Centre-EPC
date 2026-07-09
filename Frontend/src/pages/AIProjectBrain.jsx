@@ -30,47 +30,48 @@ export default function AIProjectBrain() {
 
   return (
     <Layout>
-      <div style={{ display: 'flex', height: 460, margin: -24 }}>
-        <div style={{ width: 180, borderRight: '1px solid var(--border)', padding: '14px 12px', flexShrink: 0 }}>
-          <p style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.03em', margin: '0 0 10px' }}>
+      <div className="flex h-[460px] -m-6">
+        <div className="w-[180px] border-r border-[var(--border)] p-3.5 flex-shrink-0">
+          <p className="text-[11px] text-[var(--muted)] uppercase tracking-wide m-0 mb-2.5">
             History
           </p>
           {history.map((h) => (
-            <div key={h.id} style={{ fontSize: 12, padding: '7px 8px', borderRadius: 8, color: 'var(--muted)', marginBottom: 4 }}>
+            <div key={h.id} className="text-xs px-2 py-1.5 rounded-lg text-[var(--muted)] mb-1 hover:bg-[var(--panel)] cursor-pointer transition-colors">
               {h.title}
             </div>
           ))}
         </div>
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', gap: 12, overflowY: 'auto' }}>
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 p-4 flex flex-col gap-3 overflow-y-auto">
             {messages.map((m, i) => (
               <div
                 key={i}
-                style={{
-                  alignSelf: m.from === 'user' ? 'flex-end' : 'flex-start',
-                  maxWidth: '70%',
-                  background: m.from === 'user' ? 'var(--accent-soft)' : 'var(--panel)',
-                  border: m.from === 'ai' ? '1px solid var(--border)' : 'none',
-                  borderRadius: 12,
-                  padding: '10px 12px'
-                }}
+                className={`max-w-[70%] rounded-xl p-2.5 ${
+                  m.from === 'user' 
+                    ? 'self-end bg-[var(--accent-soft)]' 
+                    : 'self-start bg-[var(--panel)] border border-[var(--border)]'
+                }`}
               >
-                <p style={{ fontSize: 13, margin: 0 }}>{m.text}</p>
-                {m.meta && <p style={{ fontSize: 12, color: 'var(--danger)', margin: '6px 0 0' }}>{m.meta}</p>}
+                <p className="text-sm m-0">{m.text}</p>
+                {m.meta && <p className="text-xs text-[var(--danger)] m-0 mt-1.5">{m.meta}</p>}
               </div>
             ))}
           </div>
 
-          <form onSubmit={handleSend} style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
+          <form onSubmit={handleSend} className="flex gap-2 p-3 border-t border-[var(--border)]">
             <input
-              className="input"
+              className="input flex-1"
               placeholder="Ask the AI manager anything..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
-            <button className="btn" type="submit">
-              <i className="ti ti-send" style={{ fontSize: 15 }} />
+            <button 
+              className="btn px-4 py-2 flex items-center gap-1.5 text-sm" 
+              type="submit"
+            >
+              <i className="ti ti-send text-base" />
+              <span>Send</span>
             </button>
           </form>
         </div>

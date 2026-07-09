@@ -26,8 +26,13 @@ export default function Landing() {
       {/* Navigation */}
       <header className="relative z-10 flex justify-between items-center px-8 py-4 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-sm">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center">
-            <i className="ti ti-robot text-xl text-[var(--accent)]" />
+          {/* Logo - using the image from public folder */}
+          <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center overflow-hidden">
+            <img 
+              src="/logo-icon.png" 
+              alt="EPC AI Manager" 
+              className="w-8 h-8 object-contain"
+            />
           </div>
           <span className="text-base font-semibold">EPC AI Manager</span>
         </div>
@@ -100,8 +105,12 @@ export default function Landing() {
             <div className="card shadow-2xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center">
-                    <i className="ti ti-robot text-lg text-[var(--accent)]" />
+                  <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/logo-icon.png" 
+                      alt="EPC AI Manager" 
+                      className="w-7 h-7 object-contain"
+                    />
                   </div>
                   <div>
                     <p className="text-sm font-medium">AI Project Brain</p>

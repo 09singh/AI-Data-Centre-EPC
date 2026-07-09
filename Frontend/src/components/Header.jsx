@@ -6,8 +6,13 @@ export default function Header() {
     <header className="flex items-center justify-between px-6 py-3 border-b border-[var(--border)] bg-[var(--bg)] sticky top-0 z-10">
       <div className="flex items-center gap-4">
         <Link to="/dashboard" className="flex items-center gap-3 no-underline">
-          <div className="w-8 h-8 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center">
-            <i className="ti ti-robot text-lg text-[var(--accent)]" />
+          {/* Logo - using the image from public folder */}
+          <div className="w-9 h-9 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center overflow-hidden">
+            <img 
+              src="/logo-icon.png" 
+              alt="EPC AI Manager" 
+              className="w-7 h-7 object-contain"
+            />
           </div>
           <span className="text-base font-semibold text-[var(--text)]">EPC AI Manager</span>
         </Link>

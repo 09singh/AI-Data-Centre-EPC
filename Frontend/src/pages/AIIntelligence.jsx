@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import Loader from '../components/Loader'
 import AlertCard from '../components/AlertCards'
@@ -6,7 +7,18 @@ import { Button } from '../components/Buttons'
 import { getRiskAnalysis, getComplianceResults, getSimulationResults } from '../services/AIAPI'
 
 export default function AIIntelligence() {
-  const [activeTab, setActiveTab] = useState('risk')
+  const location = useLocation()
+  const navigate = useNavigate()
+  
+  const getActiveTab = () => {
+    const path = location.pathname
+    if (path.includes('/risk')) return 'risk'
+    if (path.includes('/compliance')) return 'compliance'
+    if (path.includes('/simulation')) return 'simulation'
+    return 'risk'
+  }
+
+  const [activeTab, setActiveTab] = useState(getActiveTab())
   const [riskData, setRiskData] = useState(null)
   const [complianceData, setComplianceData] = useState(null)
   const [simulationData, setSimulationData] = useState(null)
@@ -25,6 +37,14 @@ export default function AIIntelligence() {
     })
   }, [])
 
+  useEffect(() => {
+    setActiveTab(getActiveTab())
+  }, [location.pathname])
+
+  const handleTabChange = (tab) => {
+    navigate(`/ai-intelligence/${tab}`)
+  }
+
   if (loading) return (
     <Layout>
       <Loader />
@@ -39,35 +59,26 @@ export default function AIIntelligence() {
 
   return (
     <Layout>
-      <div style={{ marginBottom: 14 }}>
-        <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>AI Intelligence</p>
-        <p style={{ fontSize: 12, color: 'var(--muted)', margin: '2px 0 0' }}>
+      <div className="mb-3.5">
+        <p className="text-sm font-medium m-0">AI Intelligence</p>
+        <p className="text-xs text-[var(--muted)] m-0 mt-0.5">
           AI-powered risk analysis, compliance checking, and simulation
         </p>
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', marginBottom: 16 }}>
+      <div className="flex gap-1 border-b border-[var(--border)] mb-4">
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            style={{
-              border: 'none',
-              background: activeTab === tab.id ? 'var(--accent-soft)' : 'none',
-              color: activeTab === tab.id ? 'var(--accent)' : 'var(--muted)',
-              padding: '8px 16px',
-              borderRadius: '8px 8px 0 0',
-              cursor: 'pointer',
-              fontSize: 12,
-              fontWeight: activeTab === tab.id ? 500 : 400,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              transition: 'background 0.15s, color 0.15s'
-            }}
+            onClick={() => handleTabChange(tab.id)}
+            className={`px-4 py-2 text-xs font-medium capitalize rounded-t-lg transition-colors flex items-center gap-1.5 ${
+              activeTab === tab.id 
+                ? 'bg-[var(--accent-soft)] text-[var(--accent)]' 
+                : 'text-[var(--muted)] hover:text-[var(--text)]'
+            }`}
           >
-            <i className={`ti ${tab.icon}`} style={{ fontSize: 14 }} />
+            <i className={`ti ${tab.icon} text-sm`} />
             {tab.label}
           </button>
         ))}
@@ -76,8 +87,8 @@ export default function AIIntelligence() {
       {/* Risk Tab */}
       {activeTab === 'risk' && riskData && (
         <div>
-          <div style={{ display: 'flex', gap: 20, alignItems: 'center', marginBottom: 16 }}>
-            <div style={{ position: 'relative', width: 80, height: 80, flexShrink: 0 }}>
+          <div className="flex gap-5 items-center mb-4">
+            <div className="relative w-20 h-20 flex-shrink-0">
               <svg viewBox="0 0 100 100" width="80" height="80">
                 <circle cx="50" cy="50" r="40" fill="none" stroke="var(--border)" strokeWidth="8" />
                 <circle
@@ -92,23 +103,23 @@ export default function AIIntelligence() {
                   transform="rotate(-90 50 50)"
                 />
               </svg>
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: 18, fontWeight: 600 }}>{riskData.riskScore}</span>
-                <span style={{ fontSize: 8, color: 'var(--muted)' }}>risk score</span>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-lg font-semibold">{riskData.riskScore}</span>
+                <span className="text-[8px] text-[var(--muted)]">risk score</span>
               </div>
             </div>
             <div>
-              <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 4px' }}>Predicted completion</p>
-              <p style={{ fontSize: 17, fontWeight: 500, margin: 0 }}>
+              <p className="text-sm text-[var(--muted)] m-0 mb-1">Predicted completion</p>
+              <p className="text-lg font-semibold m-0">
                 {riskData.predictedCompletion}
               </p>
-              <p style={{ fontSize: 12, color: 'var(--danger)', margin: '2px 0 0' }}>
+              <p className="text-xs text-[var(--danger)] m-0 mt-0.5">
                 {riskData.delayDays} days behind schedule
               </p>
             </div>
           </div>
 
-          <p style={{ fontSize: 12, fontWeight: 500, marginBottom: 10 }}>Detected Risks</p>
+          <p className="text-xs font-medium mb-2.5">Detected Risks</p>
           {riskData.risks.map((r, i) => (
             <AlertCard key={i} variant={r.variant} title={r.title} />
           ))}
@@ -118,20 +129,15 @@ export default function AIIntelligence() {
       {/* Compliance Tab */}
       {activeTab === 'compliance' && complianceData && (
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+          <div className="flex items-center gap-4 mb-4">
             <span
-              style={{
-                fontSize: 14,
-                padding: '4px 14px',
-                borderRadius: 8,
-                background: complianceData.passRate >= 80 ? 'var(--success-bg)' : 'var(--danger-bg)',
-                color: complianceData.passRate >= 80 ? 'var(--success)' : 'var(--danger)',
-                fontWeight: 500
-              }}
+              className={`text-sm px-3.5 py-1 rounded-lg font-medium ${
+                complianceData.passRate >= 80 ? 'bg-[var(--success-bg)] text-[var(--success)]' : 'bg-[var(--danger-bg)] text-[var(--danger)]'
+              }`}
             >
               {complianceData.passRate}% Pass Rate
             </span>
-            <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+            <span className="text-xs text-[var(--muted)]">
               {complianceData.passed} passed · {complianceData.failed} failed
             </span>
           </div>
@@ -139,25 +145,13 @@ export default function AIIntelligence() {
           {complianceData.items.map((item, i) => (
             <div
               key={i}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '8px 12px',
-                border: '1px solid var(--border)',
-                borderRadius: 8,
-                marginBottom: 6
-              }}
+              className="flex justify-between items-center p-2 border border-[var(--border)] rounded-lg mb-1.5"
             >
-              <span style={{ fontSize: 13 }}>{item.name}</span>
+              <span className="text-sm">{item.name}</span>
               <span
-                style={{
-                  fontSize: 10,
-                  padding: '2px 10px',
-                  borderRadius: 12,
-                  background: item.status === 'passed' ? 'var(--success-bg)' : 'var(--danger-bg)',
-                  color: item.status === 'passed' ? 'var(--success)' : 'var(--danger)'
-                }}
+                className={`text-[10px] px-2.5 py-1 rounded-full ${
+                  item.status === 'passed' ? 'bg-[var(--success-bg)] text-[var(--success)]' : 'bg-[var(--danger-bg)] text-[var(--danger)]'
+                }`}
               >
                 {item.status}
               </span>
@@ -169,33 +163,28 @@ export default function AIIntelligence() {
       {/* Simulation Tab */}
       {activeTab === 'simulation' && simulationData && (
         <div>
-          <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 10 }}>
+          <p className="text-xs text-[var(--muted)] mb-2.5">
             Simulate different project scenarios and see their impact
           </p>
 
           {simulationData.scenarios.map((scenario, i) => (
             <div
               key={i}
-              style={{
-                border: '1px solid var(--border)',
-                borderRadius: 10,
-                padding: '12px 14px',
-                marginBottom: 8
-              }}
+              className="border border-[var(--border)] rounded-xl p-3 mb-2"
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="flex justify-between items-center">
                 <div>
-                  <p style={{ fontSize: 13, margin: 0, fontWeight: 500 }}>{scenario.name}</p>
-                  <p style={{ fontSize: 12, color: 'var(--muted)', margin: '2px 0 0' }}>{scenario.description}</p>
+                  <p className="text-sm font-medium m-0">{scenario.name}</p>
+                  <p className="text-xs text-[var(--muted)] m-0 mt-0.5">{scenario.description}</p>
                 </div>
-                <Button variant="outline" style={{ fontSize: 11, padding: '4px 12px' }}>
+                <Button variant="outline" className="text-[11px] px-3 py-1">
                   Simulate
                 </Button>
               </div>
               {scenario.result && (
-                <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
-                  <p style={{ fontSize: 12, margin: 0 }}>
-                    <span style={{ fontWeight: 500 }}>Impact:</span> {scenario.result}
+                <div className="mt-2 pt-2 border-t border-[var(--border)]">
+                  <p className="text-xs m-0">
+                    <span className="font-medium">Impact:</span> {scenario.result}
                   </p>
                 </div>
               )}
