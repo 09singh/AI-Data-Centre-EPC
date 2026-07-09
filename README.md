@@ -8,7 +8,7 @@ AI-powered copilot for Data Centre EPC (Engineering, Procurement &amp; Construct
 This document explains how to set up and use the backend for frontend development.
 
 ---
-
+```
 backend/
 │
 ├── src/
@@ -73,6 +73,7 @@ backend/
 │   └── server.js                   // Entry point, runs the server
 │
 └── package.json
+```
 # Tech Stack
 
 - Node.js
