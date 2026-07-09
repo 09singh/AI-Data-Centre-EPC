@@ -28,7 +28,72 @@ This repository contains the **Node.js + Express.js Backend** for the AI Data Ce
 ```
 
 ---
-
+```
+backend/
+│
+├── src/
+│   │
+│   ├── config/
+│   │   ├── db.js                  // Database connection setup
+│   │   ├── env.js                 // Environment config (e.g., dotenv)
+│   │   └── axios.js               // Axios instance to call FastAPI
+│   │
+│   ├── middleware/
+│   │   ├── auth.middleware.js     // Auth checks
+│   │   ├── error.middleware.js    // Global error handling
+│   │   └── upload.middleware.js   // File upload validation
+│   │
+│   ├── services/                  // Shared logic that spans features
+│   │   └── ai.service.js           // Calls FastAPI AI endpoints
+│   │
+│   ├── features/
+│   │   │
+│   │   ├── auth/                   // Authentication feature
+│   │   │   ├── auth.routes.js      // Routes for auth
+│   │   │   ├── auth.controller.js  // Controller logic
+│   │   │   ├── auth.model.js       // User schema model
+│   │   │   └── auth.service.js     // Auth service (e.g., JWT, bcrypt)
+│   │   │
+│   │   ├── project/                // Project feature
+│   │   │   ├── project.routes.js
+│   │   │   ├── project.controller.js
+│   │   │   ├── project.model.js    // Project schema
+│   │   │   └── project.service.js  // Business logic for projects
+│   │   │
+│   │   ├── document/               // Document feature
+│   │   │   ├── document.routes.js
+│   │   │   ├── document.controller.js
+│   │   │   ├── document.model.js   // Document schema
+│   │   │   └── document.service.js // Business logic for documents
+│   │   │
+│   │   ├── ai/                     // AI feature (integrates FastAPI)
+│   │   │   ├── ai.routes.js
+│   │   │   ├── ai.controller.js
+│   │   │   └── ai.service.js       // Interacts with FastAPI AI layer
+│   │   │
+│   │   ├── compliance/             // Compliance feature
+│   │   │   ├── compliance.routes.js
+│   │   │   ├── compliance.controller.js
+│   │   │   ├── compliance.model.js // Compliance schema
+│   │   │   └── compliance.service.js // Compliance logic
+│   │   │
+│   │   ├── report/                 // Report feature
+│   │   │   ├── report.routes.js
+│   │   │   ├── report.controller.js
+│   │   │   ├── report.model.js     // Report schema
+│   │   │   └── report.service.js   // Report generation logic
+│   │   │
+│   │   └── recommendation/         // Recommendation feature
+│   │       ├── recommendation.routes.js
+│   │       ├── recommendation.controller.js
+│   │       ├── recommendation.model.js // Recommendation schema
+│   │       └── recommendation.service.js // Recommendation logic
+│   │
+│   ├── app.js                      // Initialize express app, import routes
+│   └── server.js                   // Entry point, runs the server
+│
+└── package.json
+```
 # Tech Stack
 
 ### Backend
