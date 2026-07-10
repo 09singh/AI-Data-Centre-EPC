@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 
 export default function Landing() {
   const { isLoggedIn } = useAuth()
+  const { theme } = useTheme()
   const navigate = useNavigate()
 
   function handleGetStarted() {
@@ -10,6 +12,15 @@ export default function Landing() {
       navigate('/dashboard')
     } else {
       navigate('/login')
+    }
+  }
+
+  const getLogo = () => {
+    switch(theme) {
+      case 'light': return '/light-logo.png'
+      case 'dark': return '/dark-logo.png'
+      case 'blueprint': return '/blueprint-logo.png'
+      default: return '/light-logo.png'
     }
   }
 
@@ -26,10 +37,9 @@ export default function Landing() {
       {/* Navigation */}
       <header className="relative z-10 flex justify-between items-center px-8 py-4 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-sm">
         <div className="flex items-center gap-3">
-          {/* Logo - using the image from public folder */}
           <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center overflow-hidden">
             <img 
-              src="/logo-icon.png" 
+              src={getLogo()} 
               alt="EPC AI Manager" 
               className="w-8 h-8 object-contain"
             />
@@ -107,7 +117,7 @@ export default function Landing() {
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center overflow-hidden">
                     <img 
-                      src="/logo-icon.png" 
+                      src={getLogo()} 
                       alt="EPC AI Manager" 
                       className="w-7 h-7 object-contain"
                     />

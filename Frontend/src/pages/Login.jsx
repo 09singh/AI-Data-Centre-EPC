@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import { loginUser } from '../services/AuthAPI'
 
 export default function Login() {
   const { login } = useAuth()
+  const { theme } = useTheme()
   const navigate = useNavigate()
   const [form, setForm] = useState({ 
     company: '', 
@@ -14,6 +16,45 @@ export default function Login() {
     project: '' 
   })
   const [loading, setLoading] = useState(false)
+  const [rememberMe, setRememberMe] = useState(true)
+
+  const getLogo = () => {
+    switch(theme) {
+      case 'light': return '/light-logo.png'
+      case 'dark': return '/dark-logo.png'
+      case 'blueprint': return '/blueprint-logo.png'
+      default: return '/light-logo.png'
+    }
+  }
+
+  // Load saved user details from localStorage on component mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem('savedUserDetails')
+    if (savedUser) {
+      try {
+        const parsed = JSON.parse(savedUser)
+        const savedDate = new Date(parsed.timestamp)
+        const now = new Date()
+        const diffTime = Math.abs(now - savedDate)
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        
+        if (diffDays <= 7) {
+          setForm({
+            company: parsed.company || '',
+            email: parsed.email || '',
+            password: parsed.password || '',
+            role: parsed.role || 'Project Manager',
+            project: parsed.project || ''
+          })
+          setRememberMe(true)
+        } else {
+          localStorage.removeItem('savedUserDetails')
+        }
+      } catch (e) {
+        localStorage.removeItem('savedUserDetails')
+      }
+    }
+  }, [])
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -27,6 +68,16 @@ export default function Login() {
     setLoading(true)
     const user = await loginUser(form)
     login(user)
+    
+    if (rememberMe) {
+      localStorage.setItem('savedUserDetails', JSON.stringify({
+        ...form,
+        timestamp: new Date().toISOString()
+      }))
+    } else {
+      localStorage.removeItem('savedUserDetails')
+    }
+    
     setLoading(false)
     navigate('/dashboard')
   }
@@ -63,7 +114,7 @@ export default function Login() {
           <div className="text-center mt-2 mb-6">
             <div className="w-16 h-16 rounded-2xl bg-[var(--accent-soft)] flex items-center justify-center mx-auto mb-4 overflow-hidden">
               <img 
-                src="/logo-icon.png" 
+                src={getLogo()} 
                 alt="EPC AI Manager" 
                 className="w-12 h-12 object-contain"
               />
@@ -77,6 +128,7 @@ export default function Login() {
               className="input" 
               name="company" 
               placeholder="Company Name" 
+              value={form.company}
               onChange={handleChange} 
               onKeyDown={handleKeyDown}
               required 
@@ -86,6 +138,7 @@ export default function Login() {
               name="email" 
               type="email" 
               placeholder="Work Email" 
+              value={form.email}
               onChange={handleChange} 
               onKeyDown={handleKeyDown}
               required 
@@ -95,6 +148,7 @@ export default function Login() {
               name="password" 
               type="password" 
               placeholder="Password" 
+              value={form.password}
               onChange={handleChange} 
               onKeyDown={handleKeyDown}
               required 
@@ -102,6 +156,7 @@ export default function Login() {
             <select 
               className="input appearance-none" 
               name="role" 
+              value={form.role}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
             >
@@ -114,10 +169,30 @@ export default function Login() {
               className="input" 
               name="project" 
               placeholder="Project Name" 
+              value={form.project}
               onChange={handleChange} 
               onKeyDown={handleKeyDown}
               required 
             />
+          </div>
+
+          {/* Remember Me Checkbox */}
+          <div className="flex items-center justify-between mt-3">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded border-[var(--border)] accent-[var(--accent)] cursor-pointer"
+              />
+              <span className="text-xs text-[var(--muted)]">Remember me for 7 days</span>
+            </label>
+            <button
+              type="button"
+              className="text-xs text-[var(--accent)] hover:underline"
+            >
+              Forgot password?
+            </button>
           </div>
 
           <button 

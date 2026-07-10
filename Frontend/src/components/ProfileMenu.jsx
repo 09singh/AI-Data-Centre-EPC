@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { ChevronDownIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
 
 export default function ProfileMenu() {
   const { user, logout } = useAuth()
@@ -17,7 +18,7 @@ export default function ProfileMenu() {
         <div className="w-8 h-8 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-sm font-semibold">
           {initial}
         </div>
-        <i className="ti ti-chevron-down text-xs text-[var(--muted)] group-hover:rotate-180 transition-transform" />
+        <ChevronDownIcon className="w-4 h-4 text-[var(--muted)] group-hover:rotate-180 transition-transform" />
       </div>
       
       <div className="absolute right-0 top-full mt-2 w-48 rounded-xl bg-[var(--panel)] border border-[var(--border)] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20">
@@ -31,14 +32,14 @@ export default function ProfileMenu() {
             onClick={() => navigate('/settings')}
             className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-colors flex items-center gap-2"
           >
-            <i className="ti ti-settings text-sm" />
+            <Cog6ToothIcon className="w-4 h-4" />
             Settings
           </button>
           <button 
             onClick={handleLogout}
             className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-[var(--danger-bg)] hover:text-[var(--danger)] transition-colors flex items-center gap-2"
           >
-            <i className="ti ti-logout text-sm" />
+            <ArrowRightOnRectangleIcon className="w-4 h-4" />
             Logout
           </button>
         </div>

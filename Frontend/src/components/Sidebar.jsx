@@ -1,18 +1,32 @@
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { 
+  ChevronLeftIcon, 
+  ChevronRightIcon,
+  HomeIcon,
+  DocumentTextIcon,
+  CalendarIcon,
+  BuildingOfficeIcon,
+  ServerIcon,
+  ExclamationTriangleIcon,
+  ShieldCheckIcon,
+  ChartBarIcon,
+  ClipboardDocumentCheckIcon,
+  Cog6ToothIcon
+} from '@heroicons/react/24/outline'
 
 const menuItems = [
-  { to: '/dashboard', icon: 'ti-dashboard', label: 'Dashboard' },
-  { to: '/project-hub/documents', icon: 'ti-file-text', label: 'Documents' },
-  { to: '/project-hub/schedule', icon: 'ti-calendar', label: 'Schedule' },
-  { to: '/project-hub/vendors', icon: 'ti-building', label: 'Vendors' },
-  { to: '/project-hub/equipment', icon: 'ti-server', label: 'Equipment' },
-  { to: '/ai-intelligence/risk', icon: 'ti-alert-triangle', label: 'Risk Prediction' },
-  { to: '/ai-intelligence/compliance', icon: 'ti-shield-check', label: 'Compliance Check' },
-  { to: '/ai-intelligence/simulation', icon: 'ti-chart-bar', label: 'What-If Simulator' },
-  { to: '/commissioning', icon: 'ti-clipboard-check', label: 'Commissioning' },
-  { to: '/reports', icon: 'ti-report', label: 'Reports' },
-  { to: '/settings', icon: 'ti-settings', label: 'Settings' },
+  { to: '/dashboard', icon: HomeIcon, label: 'Dashboard' },
+  { to: '/project-hub/documents', icon: DocumentTextIcon, label: 'Documents' },
+  { to: '/project-hub/schedule', icon: CalendarIcon, label: 'Schedule' },
+  { to: '/project-hub/vendors', icon: BuildingOfficeIcon, label: 'Vendors' },
+  { to: '/project-hub/equipment', icon: ServerIcon, label: 'Equipment' },
+  { to: '/ai-intelligence/risk', icon: ExclamationTriangleIcon, label: 'Risk Prediction' },
+  { to: '/ai-intelligence/compliance', icon: ShieldCheckIcon, label: 'Compliance Check' },
+  { to: '/ai-intelligence/simulation', icon: ChartBarIcon, label: 'What-If Simulator' },
+  { to: '/commissioning', icon: ClipboardDocumentCheckIcon, label: 'Commissioning' },
+  { to: '/reports', icon: DocumentTextIcon, label: 'Reports' },
+  { to: '/settings', icon: Cog6ToothIcon, label: 'Settings' },
 ]
 
 export default function Sidebar() {
@@ -36,7 +50,6 @@ export default function Sidebar() {
         ${expanded ? 'w-52' : 'w-12'}
       `}
     >
-      {/* Toggle Button - repositioned */}
       <div className="flex items-center justify-between px-2 py-3 border-b border-[var(--border)] mb-2">
         {expanded && (
           <span className="text-[10px] text-[var(--muted)] uppercase tracking-wider font-medium">
@@ -50,13 +63,18 @@ export default function Sidebar() {
           }`}
           title={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
         >
-          <i className={`ti ${expanded ? 'ti-chevron-left' : 'ti-chevron-right'} text-xs`} />
+          {expanded ? (
+            <ChevronLeftIcon className="w-3.5 h-3.5" />
+          ) : (
+            <ChevronRightIcon className="w-3.5 h-3.5" />
+          )}
         </button>
       </div>
 
       <div className="flex flex-col h-full px-2 pb-2 overflow-y-auto">
         {menuItems.map((item) => {
           const active = isActive(item.to)
+          const Icon = item.icon
           return (
             <NavLink
               key={item.to}
@@ -67,7 +85,7 @@ export default function Sidebar() {
                   : 'text-[var(--muted)] hover:bg-[var(--panel)] hover:text-[var(--text)]'
               }`}
             >
-              <i className={`ti ${item.icon} text-base w-5 text-center flex-shrink-0`} />
+              <Icon className="w-5 h-5 flex-shrink-0" />
               {expanded && <span className="truncate">{item.label}</span>}
             </NavLink>
           )

@@ -10,6 +10,7 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   }
 
+  /* Light — warm red / orange / pink theme */
   .app-theme.light {
     --bg: #ffffff;
     --panel: #fafafa;
@@ -24,8 +25,12 @@
     --success: #16a34a;
     --success-bg: #dcfce7;
     --border: #ececec;
+    --card-bg: var(--panel);
+    --card-border: 1px solid var(--border);
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.06);
   }
 
+  /* Dark — cool blue / purple / pink theme */
   .app-theme.dark {
     --bg: #161225;
     --panel: #1c1730;
@@ -40,29 +45,171 @@
     --success: #34d399;
     --success-bg: rgba(52, 211, 153, 0.14);
     --border: rgba(255, 255, 255, 0.1);
+    --card-bg: var(--panel);
+    --card-border: 1px solid var(--border);
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
+  /* Blueprint — Monochrome engineering command theme */
+  .app-theme.blueprint {
+    --bg: #0a0a0f;
+    --panel: #111118;
+    --text: #e8e8ed;
+    --muted: #6b6b80;
+    --accent: #7b8c9e;
+    --accent-soft: rgba(123, 140, 158, 0.12);
+    --danger: #8b6b6b;
+    --danger-bg: rgba(139, 107, 107, 0.12);
+    --warning: #8b7b6b;
+    --warning-bg: rgba(139, 123, 107, 0.12);
+    --success: #6b8b7b;
+    --success-bg: rgba(107, 139, 123, 0.12);
+    --border: rgba(255, 255, 255, 0.08);
+    --card-bg: transparent;
+    --card-border: 1px solid rgba(255, 255, 255, 0.1);
+    --card-shadow: none;
   }
 
   .app-theme {
     min-height: 100vh;
     background: var(--bg);
     color: var(--text);
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  /* Blueprint specific styles */
+  .app-theme.blueprint .card {
+    background: var(--card-bg);
+    border: var(--card-border);
+    box-shadow: var(--card-shadow);
+    border-radius: 8px;
+  }
+
+  .app-theme.blueprint .btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text);
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 400;
+    transition: all 0.2s;
+  }
+
+  .app-theme.blueprint .btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .app-theme.blueprint .btn-outline {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--muted);
+  }
+
+  .app-theme.blueprint .btn-outline:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--text);
+  }
+
+  .app-theme.blueprint .input {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .app-theme.blueprint .input:focus {
+    border-color: rgba(255, 255, 255, 0.3);
+    outline: none;
+  }
+
+  .app-theme.blueprint .app-shell {
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .app-theme.blueprint header,
+  .app-theme.blueprint nav {
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .app-theme.blueprint aside {
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .app-theme.blueprint .spinner {
+    border-color: rgba(255, 255, 255, 0.1);
+    border-top-color: var(--accent);
   }
 
   .btn {
-    @apply border-none cursor-pointer rounded-lg px-4 py-2 text-sm font-medium bg-[var(--accent)] text-white transition-all hover:opacity-90;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--accent);
+    color: #ffffff;
+    transition: all 0.2s;
+  }
+
+  .btn:hover {
+    opacity: 0.9;
   }
 
   .btn-outline {
-    @apply bg-transparent border border-[var(--border)] text-[var(--text)] hover:bg-[var(--panel)];
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .btn-outline:hover {
+    background: var(--panel);
   }
 
   .input {
-    @apply w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--panel)] text-[var(--text)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent;
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: var(--accent);
+    ring: 2px solid var(--accent-soft);
   }
 
   .card {
-    @apply border border-[var(--border)] rounded-xl p-4 bg-[var(--panel)];
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    background: var(--panel);
+  }
+
+  .app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .app-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .app-main {
+    flex: 1;
+    padding: 24px;
+    min-width: 0;
   }
 
   .spinner {

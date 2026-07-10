@@ -3,7 +3,7 @@ import { createContext, useContext, useState } from 'react'
 const ThemeContext = createContext()
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState('light') // 'light' (warm red/orange/pink) or 'dark' (cool blue/purple/pink)
+  const [theme, setTheme] = useState('light') // 'light', 'dark', 'blueprint'
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
