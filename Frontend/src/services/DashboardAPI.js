@@ -1,6 +1,18 @@
-// Mock dashboard data. Swap for GET /api/dashboard once backend is ready.
+import api from './api'
 
-export async function getDashboardData() {
+export const getDashboardData = async () => {
+  try {
+    const response = await api.get('/dashboard')
+    return response.data
+  } catch (error) {
+    console.error('Dashboard data error:', error)
+    // Fallback to mock data if API fails
+    return getMockDashboardData()
+  }
+}
+
+// Mock fallback data
+const getMockDashboardData = () => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({

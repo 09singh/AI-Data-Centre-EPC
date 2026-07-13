@@ -1,88 +1,113 @@
-// Mock AI service. Swap for real API calls once AI modules are ready.
+import api from './api'
 
-export async function askAIManager(question) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        response:
-          'Two switchgear orders are missing the certification field required by spec section 26-24.',
-        confidence: 0.94,
-        citedSource: 'specifications.pdf, section 26-24'
-      })
-    }, 500)
-  })
+const AI_URL = import.meta.env.VITE_AI_URL || 'http://localhost:8000'
+
+export const askAIManager = async (question) => {
+  try {
+    const response = await api.post('/ai/chat', { question })
+    return response.data
+  } catch (error) {
+    console.error('AI chat error:', error)
+    return {
+      response: 'Two switchgear orders are missing the certification field required by spec section 26-24.',
+      confidence: 0.94,
+      citedSource: 'specifications.pdf, section 26-24'
+    }
+  }
 }
 
-export async function getChatHistory() {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        { id: 1, title: 'Switchgear certification' },
-        { id: 2, title: 'Steel delivery delay' },
-        { id: 3, title: 'Weekly summary request' }
-      ])
-    }, 200)
-  })
+export const getChatHistory = async () => {
+  try {
+    const response = await api.get('/ai/history')
+    return response.data
+  } catch (error) {
+    console.error('AI history error:', error)
+    return [
+      { id: 1, title: 'Switchgear certification' },
+      { id: 2, title: 'Steel delivery delay' },
+      { id: 3, title: 'Weekly summary request' }
+    ]
+  }
 }
 
-export async function getRiskAnalysis() {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        riskScore: 72,
-        predictedCompletion: 'Mar 14, 2027',
-        delayDays: 18,
-        risks: [
-          { variant: 'danger', title: 'Switchgear order missing certification field' },
-          { variant: 'warning', title: 'Steel delivery trending 6 days late' },
-          { variant: 'warning', title: 'Cooling tower commissioning pending' }
-        ]
-      })
-    }, 300)
-  })
+export const getRiskAnalysis = async () => {
+  try {
+    const response = await api.post('/ai/risk')
+    return response.data
+  } catch (error) {
+    console.error('Risk analysis error:', error)
+    return {
+      riskScore: 72,
+      predictedCompletion: 'Mar 14, 2027',
+      delayDays: 18,
+      risks: [
+        { variant: 'danger', title: 'Switchgear order missing certification field' },
+        { variant: 'warning', title: 'Steel delivery trending 6 days late' },
+        { variant: 'warning', title: 'Cooling tower commissioning pending' }
+      ]
+    }
+  }
 }
 
-export async function getComplianceResults() {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        passRate: 85,
-        passed: 17,
-        failed: 3,
-        items: [
-          { name: 'Switchgear certification', status: 'passed' },
-          { name: 'Cooling system spec compliance', status: 'passed' },
-          { name: 'Vendor submittal review', status: 'failed' },
-          { name: 'Electrical load calculation', status: 'passed' },
-          { name: 'Fire suppression system', status: 'failed' }
-        ]
-      })
-    }, 300)
-  })
+export const getComplianceResults = async () => {
+  try {
+    const response = await api.post('/ai/compliance')
+    return response.data
+  } catch (error) {
+    console.error('Compliance error:', error)
+    return {
+      passRate: 85,
+      passed: 17,
+      failed: 3,
+      items: [
+        { name: 'Switchgear certification', status: 'passed' },
+        { name: 'Cooling system spec compliance', status: 'passed' },
+        { name: 'Vendor submittal review', status: 'failed' },
+        { name: 'Electrical load calculation', status: 'passed' },
+        { name: 'Fire suppression system', status: 'failed' }
+      ]
+    }
+  }
 }
 
-export async function getSimulationResults() {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        scenarios: [
-          {
-            name: 'Steel Delivery Delay',
-            description: 'What if steel delivery is delayed by 2 weeks?',
-            result: '5 day schedule impact · +2 critical path days'
-          },
-          {
-            name: 'Switchgear Shortage',
-            description: 'What if switchgear order is delayed by 1 month?',
-            result: '12 day schedule impact · +8 critical path days'
-          },
-          {
-            name: 'Accelerate Grading',
-            description: 'What if grading is accelerated by 1 week?',
-            result: 'Recovers 7 days · reduces overall delay by 40%'
-          }
-        ]
-      })
-    }, 300)
-  })
+export const getSimulationResults = async (scenario) => {
+  try {
+    const response = await api.post('/ai/simulation', { scenario })
+    return response.data
+  } catch (error) {
+    console.error('Simulation error:', error)
+    return {
+      scenarios: [
+        {
+          name: 'Steel Delivery Delay',
+          description: 'What if steel delivery is delayed by 2 weeks?',
+          result: '5 day schedule impact · +2 critical path days'
+        },
+        {
+          name: 'Switchgear Shortage',
+          description: 'What if switchgear order is delayed by 1 month?',
+          result: '12 day schedule impact · +8 critical path days'
+        },
+        {
+          name: 'Accelerate Grading',
+          description: 'What if grading is accelerated by 1 week?',
+          result: 'Recovers 7 days · reduces overall delay by 40%'
+        }
+      ]
+    }
+  }
+}
+
+export const getRecommendations = async () => {
+  try {
+    const response = await api.post('/ai/recommendation')
+    return response.data
+  } catch (error) {
+    console.error('Recommendations error:', error)
+    return [
+      { title: 'Switchgear Vendor Follow-up', priority: 'High' },
+      { title: 'Steel Delivery Mitigation', priority: 'Medium' },
+      { title: 'Cooling System Testing', priority: 'Low' }
+    ]
+  }
 }

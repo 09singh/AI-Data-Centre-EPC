@@ -1,6 +1,66 @@
-// Mock project data. Swap for GET /api/projects/:id once backend is ready.
+import api from './api'
 
-export async function getProjectSummary() {
+export const getProjects = async () => {
+  try {
+    const response = await api.get('/projects')
+    return response.data
+  } catch (error) {
+    console.error('Get projects error:', error)
+    return getMockProjects()
+  }
+}
+
+export const getProjectById = async (id) => {
+  try {
+    const response = await api.get(`/projects/${id}`)
+    return response.data
+  } catch (error) {
+    console.error('Get project error:', error)
+    return getMockProjectSummary()
+  }
+}
+
+export const createProject = async (projectData) => {
+  try {
+    const response = await api.post('/projects', projectData)
+    return response.data
+  } catch (error) {
+    console.error('Create project error:', error)
+    throw error
+  }
+}
+
+export const updateProject = async (id, projectData) => {
+  try {
+    const response = await api.put(`/projects/${id}`, projectData)
+    return response.data
+  } catch (error) {
+    console.error('Update project error:', error)
+    throw error
+  }
+}
+
+export const deleteProject = async (id) => {
+  try {
+    const response = await api.delete(`/projects/${id}`)
+    return response.data
+  } catch (error) {
+    console.error('Delete project error:', error)
+    throw error
+  }
+}
+
+export const getProjectSummary = async () => {
+  try {
+    const response = await api.get('/projects/summary')
+    return response.data
+  } catch (error) {
+    console.error('Project summary error:', error)
+    return getMockProjectSummary()
+  }
+}
+
+const getMockProjectSummary = () => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({

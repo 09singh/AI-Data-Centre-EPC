@@ -16,6 +16,7 @@ export default function Login() {
     project: '' 
   })
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [rememberMe, setRememberMe] = useState(true)
 
   const getLogo = () => {
@@ -27,7 +28,6 @@ export default function Login() {
     }
   }
 
-  // Load saved user details from localStorage on component mount
   useEffect(() => {
     const savedUser = localStorage.getItem('savedUserDetails')
     if (savedUser) {
@@ -58,28 +58,38 @@ export default function Login() {
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value })
+    setError('')
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
     if (!form.company || !form.email || !form.password || !form.project) {
+      setError('Please fill in all fields')
       return
     }
+    
     setLoading(true)
-    const user = await loginUser(form)
-    login(user)
+    setError('')
     
-    if (rememberMe) {
-      localStorage.setItem('savedUserDetails', JSON.stringify({
-        ...form,
-        timestamp: new Date().toISOString()
-      }))
-    } else {
-      localStorage.removeItem('savedUserDetails')
+    try {
+      const user = await loginUser(form)
+      login(user)
+      
+      if (rememberMe) {
+        localStorage.setItem('savedUserDetails', JSON.stringify({
+          ...form,
+          timestamp: new Date().toISOString()
+        }))
+      } else {
+        localStorage.removeItem('savedUserDetails')
+      }
+      
+      navigate('/dashboard')
+    } catch (err) {
+      setError(err.response?.data?.message || 'Login failed. Please try again.')
+    } finally {
+      setLoading(false)
     }
-    
-    setLoading(false)
-    navigate('/dashboard')
   }
 
   function handleKeyDown(e) {
@@ -122,6 +132,12 @@ export default function Login() {
             <h2 className="text-xl font-semibold text-[var(--text)]">Welcome Back</h2>
             <p className="text-sm text-[var(--muted)] mt-1">Access your EPC project dashboard</p>
           </div>
+
+          {error && (
+            <div className="mb-3 p-2 rounded-lg bg-[var(--danger-bg)] text-[var(--danger)] text-sm text-center">
+              {error}
+            </div>
+          )}
 
           <div className="space-y-3">
             <input 
@@ -176,7 +192,6 @@ export default function Login() {
             />
           </div>
 
-          {/* Remember Me Checkbox */}
           <div className="flex items-center justify-between mt-3">
             <label className="flex items-center gap-2 cursor-pointer">
               <input

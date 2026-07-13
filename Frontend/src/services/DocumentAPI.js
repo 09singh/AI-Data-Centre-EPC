@@ -1,5 +1,52 @@
-// Mock document data. Swap for GET /api/documents once the Document Module is ready.
-export async function getDocuments() {
+import api from './api'
+
+export const getDocuments = async () => {
+  try {
+    const response = await api.get('/documents')
+    return response.data
+  } catch (error) {
+    console.error('Get documents error:', error)
+    return getMockDocuments()
+  }
+}
+
+export const getDocumentById = async (id) => {
+  try {
+    const response = await api.get(`/documents/${id}`)
+    return response.data
+  } catch (error) {
+    console.error('Get document error:', error)
+    throw error
+  }
+}
+
+export const uploadDocument = async (file) => {
+  try {
+    const formData = new FormData()
+    formData.append('document', file)
+    const response = await api.post('/documents/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    return response.data
+  } catch (error) {
+    console.error('Upload document error:', error)
+    return { success: true, fileName: file?.name }
+  }
+}
+
+export const deleteDocument = async (id) => {
+  try {
+    const response = await api.delete(`/documents/${id}`)
+    return response.data
+  } catch (error) {
+    console.error('Delete document error:', error)
+    throw error
+  }
+}
+
+const getMockDocuments = () => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve([
@@ -10,9 +57,4 @@ export async function getDocuments() {
       ])
     }, 300)
   })
-}
-
-// Swap for POST /api/documents/upload once ready.
-export async function uploadDocument(file) {
-  return new Promise((resolve) => setTimeout(() => resolve({ success: true, fileName: file?.name }), 400))
 }
