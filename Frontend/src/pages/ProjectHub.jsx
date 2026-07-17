@@ -12,7 +12,9 @@ export default function ProjectHub() {
   const navigate = useNavigate()
   const [documents, setDocuments] = useState(null)
   const [projectData, setProjectData] = useState(null)
+  const [selectedProject, setSelectedProject] = useState(null)
   const [selectedDoc, setSelectedDoc] = useState(null)
+
   const [selectedEquipment, setSelectedEquipment] = useState(null)
   const [selectedVendor, setSelectedVendor] = useState(null)
   const [selectedTask, setSelectedTask] = useState(null)
@@ -346,7 +348,7 @@ export default function ProjectHub() {
           <div className="bg-[var(--panel)] border border-[var(--border)] rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
               <i className="ti ti-brain text-[var(--accent)] text-lg" />
-              <p className="text-sm font-medium m-0">AI Document Intelligence</p>
+              <p className="m-0 text-sm font-medium">AI Document Intelligence</p>
             </div>
             
             {selectedDoc ? (
@@ -359,7 +361,7 @@ export default function ProjectHub() {
                 <div className="space-y-2">
                   <div className="bg-[var(--bg)] rounded-lg p-3 border border-[var(--border)]">
                     <p className="text-xs text-[var(--muted)] m-0">AI Summary</p>
-                    <p className="text-sm m-0 mt-1">Document processed successfully. No critical issues detected.</p>
+                    <p className="m-0 mt-1 text-sm">Document processed successfully. No critical issues detected.</p>
                   </div>
                   
                   <div className="bg-[var(--bg)] rounded-lg p-3 border border-[var(--border)]">
@@ -371,17 +373,17 @@ export default function ProjectHub() {
                     </div>
                   </div>
 
-                  <button className="btn w-full text-sm py-2 flex items-center justify-center gap-2">
-                    <i className="ti ti-message-2 text-sm" />
+                  <button className="flex items-center justify-center w-full gap-2 py-2 text-sm btn">
+                    <i className="text-sm ti ti-message-2" />
                     Ask AI about this document
                   </button>
                 </div>
               </div>
             ) : (
               <div className="text-center py-8 text-[var(--muted)]">
-                <i className="ti ti-file-text text-3xl block mb-3 opacity-50" />
-                <p className="text-sm m-0">Select a document to analyze</p>
-                <p className="text-xs m-0 mt-1">Click on any document to view AI insights</p>
+                <i className="block mb-3 text-3xl opacity-50 ti ti-file-text" />
+                <p className="m-0 text-sm">Select a document to analyze</p>
+                <p className="m-0 mt-1 text-xs">Click on any document to view AI insights</p>
               </div>
             )}
           </div>
@@ -393,9 +395,9 @@ export default function ProjectHub() {
         <div className="space-y-4">
           {/* Summary Stats */}
           <div className="grid grid-cols-5 gap-3">
-            <div className="card text-center py-2">
+            <div className="py-2 text-center card">
               <p className="text-xs text-[var(--muted)] m-0">Total Tasks</p>
-              <p className="text-lg font-bold m-0">{tasks.length}</p>
+              <p className="m-0 text-lg font-bold">{tasks.length}</p>
             </div>
             <div className="card text-center py-2 border-l-4 border-l-[var(--success)]">
               <p className="text-xs text-[var(--muted)] m-0">Completed</p>
@@ -439,7 +441,7 @@ export default function ProjectHub() {
                         onClick={() => setSelectedTask(task.id)}
                       >
                         <div className="flex items-start justify-between mb-1">
-                          <p className="text-sm font-medium m-0 flex-1">{task.title}</p>
+                          <p className="flex-1 m-0 text-sm font-medium">{task.title}</p>
                           <span className={`text-[8px] px-1.5 py-0.5 rounded-full ${getPriorityColor(task.priority)} flex-shrink-0 ml-1`}>
                             {task.priority}
                           </span>
@@ -477,7 +479,7 @@ export default function ProjectHub() {
                           </div>
                         )}
                         {task.dependencies && task.dependencies.length > 0 && (
-                          <div className="mt-1 flex flex-wrap gap-1">
+                          <div className="flex flex-wrap gap-1 mt-1">
                             {task.dependencies.map((dep, i) => (
                               <span key={i} className="text-[8px] px-1.5 py-0.5 rounded bg-[var(--panel)] border border-[var(--border)] text-[var(--muted)]">
                                 {dep}
@@ -495,18 +497,18 @@ export default function ProjectHub() {
 
           {/* Task Details Modal */}
           {selectedTask && (
-            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
               <div className="card max-w-2xl w-full max-h-[80vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <i className={`ti ${getStatusIcon(tasks.find(t => t.id === selectedTask)?.status)} text-[var(--accent)]`} />
-                    <p className="text-base font-semibold m-0">{tasks.find(t => t.id === selectedTask)?.title}</p>
+                    <p className="m-0 text-base font-semibold">{tasks.find(t => t.id === selectedTask)?.title}</p>
                   </div>
                   <button
                     onClick={() => setSelectedTask(null)}
                     className="text-[var(--muted)] hover:text-[var(--text)] transition-colors"
                   >
-                    <i className="ti ti-x text-xl" />
+                    <i className="text-xl ti ti-x" />
                   </button>
                 </div>
 
@@ -531,7 +533,7 @@ export default function ProjectHub() {
                         </div>
                         <div>
                           <p className="text-xs text-[var(--muted)] m-0">Due Date</p>
-                          <p className="text-sm m-0">{task.dueDate}</p>
+                          <p className="m-0 text-sm">{task.dueDate}</p>
                         </div>
                         <div>
                           <p className="text-xs text-[var(--muted)] m-0">Progress</p>
@@ -558,18 +560,18 @@ export default function ProjectHub() {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <p className="text-xs text-[var(--muted)] m-0">Assigned Team</p>
-                          <p className="text-sm m-0">{task.assignedTeam}</p>
+                          <p className="m-0 text-sm">{task.assignedTeam}</p>
                         </div>
                         <div>
                           <p className="text-xs text-[var(--muted)] m-0">Category</p>
-                          <p className="text-sm m-0">{task.category}</p>
+                          <p className="m-0 text-sm">{task.category}</p>
                         </div>
                       </div>
 
                       {task.vendor && (
                         <div>
                           <p className="text-xs text-[var(--muted)] m-0">Vendor</p>
-                          <p className="text-sm m-0">{task.vendor}</p>
+                          <p className="m-0 text-sm">{task.vendor}</p>
                         </div>
                       )}
 
@@ -617,9 +619,9 @@ export default function ProjectHub() {
                         <div className="bg-[var(--accent-soft)] rounded-lg p-3 border border-[var(--accent)]">
                           <div className="flex items-center gap-2 mb-1">
                             <i className="ti ti-brain text-[var(--accent)]" />
-                            <p className="text-xs font-medium m-0">AI Schedule Insight</p>
+                            <p className="m-0 text-xs font-medium">AI Schedule Insight</p>
                           </div>
-                          <p className="text-sm m-0">{task.aiInsight}</p>
+                          <p className="m-0 text-sm">{task.aiInsight}</p>
                         </div>
                       )}
 
@@ -628,15 +630,15 @@ export default function ProjectHub() {
                         <div className="bg-[var(--warning-bg)] rounded-lg p-3 border border-[var(--warning)]">
                           <div className="flex items-center gap-2 mb-1">
                             <i className="ti ti-tools text-[var(--warning)]" />
-                            <p className="text-xs font-medium m-0">Recovery Suggestion</p>
+                            <p className="m-0 text-xs font-medium">Recovery Suggestion</p>
                           </div>
-                          <p className="text-sm m-0">{task.recoverySuggestion}</p>
+                          <p className="m-0 text-sm">{task.recoverySuggestion}</p>
                         </div>
                       )}
 
                       <div className="flex gap-3 pt-2">
-                        <Button className="flex-1 text-sm py-2">Update Status</Button>
-                        <Button variant="outline" className="flex-1 text-sm py-2" onClick={() => setSelectedTask(null)}>
+                        <Button className="flex-1 py-2 text-sm">Update Status</Button>
+                        <Button variant="outline" className="flex-1 py-2 text-sm" onClick={() => setSelectedTask(null)}>
                           Close
                         </Button>
                       </div>
@@ -654,7 +656,7 @@ export default function ProjectHub() {
         <div className="space-y-4">
           {/* Vendor Directory */}
           <div className="card">
-            <p className="text-sm font-medium mb-3">Vendor Directory</p>
+            <p className="mb-3 text-sm font-medium">Vendor Directory</p>
             <div className="grid grid-cols-2 gap-3">
               {vendorsData.map((vendor) => (
                 <div
@@ -663,7 +665,7 @@ export default function ProjectHub() {
                   onClick={() => setSelectedVendor(vendor.id)}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium m-0">{vendor.name}</p>
+                    <p className="m-0 text-sm font-medium">{vendor.name}</p>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full ${getStatusColor(vendor.status)}`}>
                       {vendor.status}
                     </span>
@@ -677,12 +679,12 @@ export default function ProjectHub() {
 
           {/* Delivery & Procurement Status */}
           <div className="card">
-            <p className="text-sm font-medium mb-3">Delivery & Procurement Status</p>
+            <p className="mb-3 text-sm font-medium">Delivery & Procurement Status</p>
             <div className="space-y-2">
               {vendorsData.map((vendor) => (
                 <div key={vendor.id} className="flex items-center justify-between py-2 border-b border-[var(--border)] last:border-0">
                   <div>
-                    <p className="text-sm m-0">{vendor.name}</p>
+                    <p className="m-0 text-sm">{vendor.name}</p>
                     <p className="text-xs text-[var(--muted)] m-0">Expected: {vendor.expectedDelivery}</p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -698,11 +700,11 @@ export default function ProjectHub() {
 
           {/* Vendor Performance */}
           <div className="card">
-            <p className="text-sm font-medium mb-3">Vendor Performance</p>
+            <p className="mb-3 text-sm font-medium">Vendor Performance</p>
             <div className="grid grid-cols-3 gap-4">
               {vendorsData.map((vendor) => (
                 <div key={vendor.id} className="border border-[var(--border)] rounded-lg p-3 text-center">
-                  <p className="text-sm font-medium m-0">{vendor.name}</p>
+                  <p className="m-0 text-sm font-medium">{vendor.name}</p>
                   <div className="mt-2">
                     <div className="flex items-center justify-center gap-2">
                       <span className="text-lg font-bold">{vendor.reliabilityScore}%</span>
@@ -725,7 +727,7 @@ export default function ProjectHub() {
         <div className="space-y-4">
           {/* Equipment Inventory */}
           <div className="card">
-            <p className="text-sm font-medium mb-3">Equipment Inventory</p>
+            <p className="mb-3 text-sm font-medium">Equipment Inventory</p>
             <div className="grid grid-cols-2 gap-3">
               {equipmentData.map((equipment) => (
                 <div
@@ -741,7 +743,7 @@ export default function ProjectHub() {
                         equipment.type === 'Power' ? 'ti-device-floppy' :
                         'ti-shield'
                       } text-[var(--accent)]`} />
-                      <p className="text-sm font-medium m-0">{equipment.name}</p>
+                      <p className="m-0 text-sm font-medium">{equipment.name}</p>
                     </div>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full ${getStatusColor(equipment.status)}`}>
                       {equipment.status}
@@ -760,12 +762,12 @@ export default function ProjectHub() {
 
           {/* Installation & Testing Status */}
           <div className="card">
-            <p className="text-sm font-medium mb-3">Installation & Testing Status</p>
+            <p className="mb-3 text-sm font-medium">Installation & Testing Status</p>
             <div className="space-y-2">
               {equipmentData.map((equipment) => (
                 <div key={equipment.id} className="flex items-center justify-between py-2 border-b border-[var(--border)] last:border-0">
                   <div>
-                    <p className="text-sm m-0">{equipment.name}</p>
+                    <p className="m-0 text-sm">{equipment.name}</p>
                     <p className="text-xs text-[var(--muted)] m-0">{equipment.type} · {equipment.model}</p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -785,7 +787,7 @@ export default function ProjectHub() {
           {selectedEquipment && (
             <div className="card border-[var(--accent)]">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-sm font-medium m-0">Equipment Details</p>
+                <p className="m-0 text-sm font-medium">Equipment Details</p>
                 <button 
                   onClick={() => setSelectedEquipment(null)}
                   className="text-[var(--muted)] hover:text-[var(--text)]"
@@ -801,11 +803,11 @@ export default function ProjectHub() {
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
                           <p className="text-xs text-[var(--muted)] m-0">Specifications</p>
-                          <p className="text-sm m-0">{eq.specifications}</p>
+                          <p className="m-0 text-sm">{eq.specifications}</p>
                         </div>
                         <div className="space-y-1">
                           <p className="text-xs text-[var(--muted)] m-0">Vendor</p>
-                          <p className="text-sm m-0">{eq.vendor}</p>
+                          <p className="m-0 text-sm">{eq.vendor}</p>
                         </div>
                         <div className="space-y-1">
                           <p className="text-xs text-[var(--muted)] m-0">Related Documents</p>
@@ -819,7 +821,7 @@ export default function ProjectHub() {
                         </div>
                         <div className="space-y-1">
                           <p className="text-xs text-[var(--muted)] m-0">Maintenance History</p>
-                          <p className="text-sm m-0">{eq.maintenanceHistory}</p>
+                          <p className="m-0 text-sm">{eq.maintenanceHistory}</p>
                         </div>
                       </div>
                     )
