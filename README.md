@@ -640,4 +640,8 @@ toast.error(error.response.data.message);
 - Use Pagination for Large Lists
 - Refresh Data After Create/Update/Delete
 - Never call the FastAPI AI Layer directly from the frontend.
+<<<<<<< HEAD
 - All requests must go through the Express backend.
+=======
+- All requests must go through the Express backend.
+>>>>>>> 606d47541e84ba4a8ce10897ebdf4cfe70ff2496

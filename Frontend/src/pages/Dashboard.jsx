@@ -12,16 +12,55 @@ import { getDashboardData } from '../services/DashboardAPI'
 export default function Dashboard() {
   const navigate = useNavigate()
   const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    getDashboardData().then(setData)
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const result = await getDashboardData()
+        setData(result)
+        setError(null)
+      } catch (err) {
+        setError('Failed to load dashboard data')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
   }, [])
+
+  if (loading) return (
+    <Layout>
+      <Loader />
+    </Layout>
+  )
+
+  if (error) return (
+    <Layout>
+      <div className="text-center py-12">
+        <i className="ti ti-alert-circle text-4xl text-[var(--danger)] block mb-3" />
+        <p className="text-lg font-medium">{error}</p>
+        <button 
+          className="btn mt-4" 
+          onClick={() => window.location.reload()}
+        >
+          Retry
+        </button>
+      </div>
+    </Layout>
+  )
 
   if (!data) return (
     <Layout>
       <Loader />
     </Layout>
   )
+
+  // Rest of your Dashboard component remains the same...
+  // (Keep all your existing dashboard JSX code here)
 
   // Risk trend data for mini chart
   const riskTrend = [4, 5, 3, 6, 4, 7, 5]
