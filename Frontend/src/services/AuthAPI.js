@@ -1,30 +1,3 @@
-<<<<<<< HEAD
-import { apiPost } from './request'
-
-// Real auth service (JWT)
-export async function loginUser(details) {
-  const res = await apiPost('/api/auth/login', {
-    email: details.email,
-    password: details.password,
-    role: details.role,
-  })
-
-  // Backend response: { success, token, role, message }
-  if (!res?.token) {
-    throw new Error(res?.message || 'Login failed')
-  }
-
-  return {
-    token: res.token,
-    user: {
-      email: details.email,
-      role: res.role || details.role || 'Project Manager',
-      name: details.company || 'Project Manager'
-    }
-  }
-}
-
-=======
 import api from './api'
 
 export const loginUser = async (credentials) => {
@@ -74,4 +47,3 @@ export const getCurrentUser = () => {
 export const getToken = () => {
   return localStorage.getItem('token')
 }
->>>>>>> 606d47541e84ba4a8ce10897ebdf4cfe70ff2496

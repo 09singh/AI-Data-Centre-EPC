@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-import { apiGet } from './request'
-
-// Backend integration
-// GET /api/reports returns: { success: true, data: Report[] }
-export async function getReports() {
-  const res = await apiGet('/api/reports')
-  const payload = res?.data ?? res
-  return Array.isArray(payload) ? payload : []
-}
-
-=======
 import api from './api'
 
 export const getReports = async () => {
@@ -67,4 +55,3 @@ export const getCommissioningData = async () => {
     return null
   }
 }
->>>>>>> 606d47541e84ba4a8ce10897ebdf4cfe70ff2496

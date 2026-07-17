@@ -63,15 +63,15 @@ export default function Dashboard() {
   // (Keep all your existing dashboard JSX code here)
 
   // Risk trend data for mini chart
-  const riskTrend = [4, 5, 3, 6, 4, 7, 5]
+  // const riskTrend = [4, 5, 3, 6, 4, 7, 5]
 
-  // Milestone data for notebook chart
-  const milestoneData = [
-    { phase: 'Design', status: 'complete', progress: 100 },
-    { phase: 'Procurement', status: 'complete', progress: 100 },
-    { phase: 'Construction', status: 'active', progress: 65 },
-    { phase: 'Commissioning', status: 'upcoming', progress: 15 }
-  ]
+  // // Milestone data for notebook chart
+  // const milestoneData = [
+  //   { phase: 'Design', status: 'complete', progress: 100 },
+  //   { phase: 'Procurement', status: 'complete', progress: 100 },
+  //   { phase: 'Construction', status: 'active', progress: 65 },
+  //   { phase: 'Commissioning', status: 'upcoming', progress: 15 }
+  // ]
 
   return (
     <Layout>

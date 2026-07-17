@@ -1,91 +1,45 @@
-<<<<<<< HEAD
-import { apiGet, apiPost } from './request'
-
-// Health check
-export function getAIHealth() {
-  return apiGet('/api/ai/health')
-}
-
-// Chat endpoints
-export async function askAIManager(question, options = {}) {
-  // Backend contract is assumed to accept { question } and optionally { context }.
-  // Keep it flexible so UI can evolve.
-  const res = await apiPost('/api/ai/chat', {
-    question,
-    ...options
-  })
-
-  // Normalize common shapes.
-  // Expected by existing UI: { response, confidence, citedSource }
-  if (res && typeof res === 'object') {
-    return {
-      response: res.response ?? res.answer ?? res.text ?? '',
-      confidence: res.confidence ?? res.confidenceScore ?? 0,
-      citedSource: res.citedSource ?? res.citations ?? res.source ?? ''
-    }
-  }
-
-  return { response: String(res ?? ''), confidence: 0, citedSource: '' }
-}
-
-// No backend chat-history endpoint exists yet. Keep this export removed.
-// If other components still import getChatHistory, compilation will fail and
-// we should update them accordingly.
-
-// Other AI modules
-export function getRiskAnalysis() {
-  return apiPost('/api/ai/recommendation')
-}
-
-export function getComplianceResults() {
-  return apiPost('/api/ai/compliance')
-}
-
-export function getSimulationResults() {
-  return apiPost('/api/ai/reports')
-}
-
-// Search (optional for now)
-export function searchAI(query, options = {}) {
-  return apiPost('/api/ai/search', { query, ...options })
-}
-
-=======
 import api from './api'
 
-const AI_URL = import.meta.env.VITE_AI_URL || 'http://localhost:8000'
-
-export const askAIManager = async (question) => {
+export const getAIHealth = async () => {
   try {
-    const response = await api.post('/ai/chat', { question })
+    const response = await api.get('/ai/health')
+    return response.data
+  } catch (error) {
+    console.error('AI health error:', error)
+    return { status: 'unavailable' }
+  }
+}
+
+export const askAIManager = async (question, options = {}) => {
+  try {
+    const response = await api.post('/ai/chat', { 
+      question,
+      ...options 
+    })
     return response.data
   } catch (error) {
     console.error('AI chat error:', error)
     return {
-      response: 'Two switchgear orders are missing the certification field required by spec section 26-24.',
-      confidence: 0.94,
-      citedSource: 'specifications.pdf, section 26-24'
+      response: error.response?.data?.message || 'AI service unavailable. Using fallback response.',
+      confidence: 0,
+      citedSource: ''
     }
   }
 }
 
-export const getChatHistory = async () => {
+export const searchAI = async (query, options = {}) => {
   try {
-    const response = await api.get('/ai/history')
+    const response = await api.post('/ai/search', { query, ...options })
     return response.data
   } catch (error) {
-    console.error('AI history error:', error)
-    return [
-      { id: 1, title: 'Switchgear certification' },
-      { id: 2, title: 'Steel delivery delay' },
-      { id: 3, title: 'Weekly summary request' }
-    ]
+    console.error('AI search error:', error)
+    return { results: [] }
   }
 }
 
 export const getRiskAnalysis = async () => {
   try {
-    const response = await api.post('/ai/risk')
+    const response = await api.post('/ai/recommendation')
     return response.data
   } catch (error) {
     console.error('Risk analysis error:', error)
@@ -125,7 +79,7 @@ export const getComplianceResults = async () => {
 
 export const getSimulationResults = async (scenario) => {
   try {
-    const response = await api.post('/ai/simulation', { scenario })
+    const response = await api.post('/ai/reports', { scenario })
     return response.data
   } catch (error) {
     console.error('Simulation error:', error)
@@ -164,4 +118,3 @@ export const getRecommendations = async () => {
     ]
   }
 }
->>>>>>> 606d47541e84ba4a8ce10897ebdf4cfe70ff2496

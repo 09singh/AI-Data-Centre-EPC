@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-import { apiGet } from './request'
-
-export async function getDashboardData() {
-  // Response shape must match the current mock object used by Dashboard.jsx
-  const res = await apiGet('/api/dashboard')
-  // Backend returns { success: true, data: { ...dashboardFields } }
-  return res?.data ?? res
-}
-
-=======
 import api from './api'
 
 export const getDashboardData = async () => {
@@ -80,4 +69,3 @@ const getMockDashboardData = () => {
     }, 300)
   })
 }
->>>>>>> 606d47541e84ba4a8ce10897ebdf4cfe70ff2496
