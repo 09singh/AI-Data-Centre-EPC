@@ -1,433 +1,643 @@
-# AI Data Centre EPC - Backend Integration
+# Frontend Integration Guide
+## AI Data Centre EPC Platform
 
-This repository contains the **Node.js + Express.js Backend** for the AI Data Centre EPC platform. It acts as the central API gateway between the **React Frontend**, **MongoDB**, and the **FastAPI AI Layer**.
-
----
-
-## Architecture
-
-```
-                    React Frontend
-                           │
-                           │ REST APIs
-                           ▼
-                Node.js + Express Backend
-        ┌──────────────┼───────────────┐
-        │              │               │
-        ▼              ▼               ▼
-   MongoDB        FastAPI AI Layer    Authentication
-        │              │
-        │              ▼
-        │     AI Processing
-        │     Document Analysis
-        │     Compliance Check
-        │     Recommendation Engine
-        │     Report Generation
-        ▼
- Persistent Storage
-```
-
----
-```
-backend/
-│
-├── src/
-│   │
-│   ├── config/
-│   │   ├── db.js                  // Database connection setup
-│   │   ├── env.js                 // Environment config (e.g., dotenv)
-│   │   └── axios.js               // Axios instance to call FastAPI
-│   │
-│   ├── middleware/
-│   │   ├── auth.middleware.js     // Auth checks
-│   │   ├── error.middleware.js    // Global error handling
-│   │   └── upload.middleware.js   // File upload validation
-│   │
-│   ├── services/                  // Shared logic that spans features
-│   │   └── ai.service.js           // Calls FastAPI AI endpoints
-│   │
-│   ├── features/
-│   │   │
-│   │   ├── auth/                   // Authentication feature
-│   │   │   ├── auth.routes.js      // Routes for auth
-│   │   │   ├── auth.controller.js  // Controller logic
-│   │   │   ├── auth.model.js       // User schema model
-│   │   │   └── auth.service.js     // Auth service (e.g., JWT, bcrypt)
-│   │   │
-│   │   ├── project/                // Project feature
-│   │   │   ├── project.routes.js
-│   │   │   ├── project.controller.js
-│   │   │   ├── project.model.js    // Project schema
-│   │   │   └── project.service.js  // Business logic for projects
-│   │   │
-│   │   ├── document/               // Document feature
-│   │   │   ├── document.routes.js
-│   │   │   ├── document.controller.js
-│   │   │   ├── document.model.js   // Document schema
-│   │   │   └── document.service.js // Business logic for documents
-│   │   │
-│   │   ├── ai/                     // AI feature (integrates FastAPI)
-│   │   │   ├── ai.routes.js
-│   │   │   ├── ai.controller.js
-│   │   │   └── ai.service.js       // Interacts with FastAPI AI layer
-│   │   │
-│   │   ├── compliance/             // Compliance feature
-│   │   │   ├── compliance.routes.js
-│   │   │   ├── compliance.controller.js
-│   │   │   ├── compliance.model.js // Compliance schema
-│   │   │   └── compliance.service.js // Compliance logic
-│   │   │
-│   │   ├── report/                 // Report feature
-│   │   │   ├── report.routes.js
-│   │   │   ├── report.controller.js
-│   │   │   ├── report.model.js     // Report schema
-│   │   │   └── report.service.js   // Report generation logic
-│   │   │
-│   │   └── recommendation/         // Recommendation feature
-│   │       ├── recommendation.routes.js
-│   │       ├── recommendation.controller.js
-│   │       ├── recommendation.model.js // Recommendation schema
-│   │       └── recommendation.service.js // Recommendation logic
-│   │
-│   ├── app.js                      // Initialize express app, import routes
-│   └── server.js                   // Entry point, runs the server
-│
-└── package.json
-```
-# Tech Stack
-
-### Backend
-
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- JWT Authentication
-- Multer
-- Axios
-
-### AI Layer
-
-- FastAPI
-- Python
-- LangChain
-- RAG Pipeline
-- Vector Database
-
-### Frontend
-
-- React.js
-- Vite
-- Axios
+This document explains how the React frontend should communicate with the Express backend.
 
 ---
 
-# Backend Responsibilities
+# Overall Architecture
 
-The Express backend is responsible for:
+```
+                React Frontend
+                       │
+                       │ REST API
+                       ▼
+          Express.js Backend (Node.js)
+               │               │
+               │               │
+               ▼               ▼
+          MongoDB        FastAPI AI Layer
+```
 
-- User Authentication
-- Project Management
-- Document Management
-- File Upload
-- Database Operations
-- Calling AI APIs
-- Returning Responses to Frontend
-
-The backend **does not perform AI processing**.
-
-All AI-related processing is delegated to the FastAPI service.
+> **Important**
+>
+> The frontend **never communicates directly with the AI Layer**.
+>
+> Every request goes through the Express backend.
 
 ---
 
-# Feature-Based Architecture
+# Base URL
+
+Development
 
 ```
-src/
-│
-├── config/
-│   ├── axios.js
-│   └── db.js
-│
-├── middleware/
-│
-├── features/
-│   ├── auth/
-│   ├── project/
-│   ├── document/
-│   ├── ai/
-│   ├── compliance/
-│   ├── recommendation/
-│   └── report/
-│
-├── app.js
-└── server.js
+http://localhost:5000/api
 ```
 
 ---
 
-# Integration Flow
+# Response Format
 
-## Document Upload
+Every API returns the same structure.
 
+Success Response
+
+```json
+{
+    "success": true,
+    "data": {}
+}
 ```
-Frontend
-      │
-      ▼
-POST /api/documents/upload
-      │
-      ▼
-Express Backend
-      │
-      ├── Save metadata to MongoDB
-      │
-      └── Send document to FastAPI
-                  │
-                  ▼
-          Text Extraction
-          Embedding
-          Vector Storage
-                  │
-                  ▼
-          Success Response
+
+Error Response
+
+```json
+{
+    "success": false,
+    "message": "Something went wrong"
+}
 ```
 
 ---
 
-## AI Chat
+# Authentication
+
+## Register
+
+POST
 
 ```
-Frontend
+/auth/register
+```
 
-      │
+Body
 
-POST /api/ai/chat
+```json
+{
+    "name":"John",
+    "email":"john@gmail.com",
+    "password":"123456"
+}
+```
 
-      │
+---
 
-Express Backend
+## Login
 
-      │
+POST
 
-Axios
+```
+/auth/login
+```
 
-      │
+Body
 
-FastAPI
-
-      │
-
-LLM
-
-      │
+```json
+{
+    "email":"john@gmail.com",
+    "password":"123456"
+}
+```
 
 Response
 
-      │
-
-Frontend
+```json
+{
+    "success":true,
+    "token":"JWT_TOKEN",
+    "user":{}
+}
 ```
 
 ---
 
-## Compliance Analysis
+# Save Token
+
+After login
+
+```javascript
+localStorage.setItem("token", response.data.token);
+```
+
+---
+
+# Send Token
+
+Every protected request must include
 
 ```
+Authorization: Bearer JWT_TOKEN
+```
+
+Axios Example
+
+```javascript
+axios.get(url,{
+    headers:{
+        Authorization:`Bearer ${token}`
+    }
+})
+```
+
+---
+
+# Projects
+
+## Create Project
+
+POST
+
+```
+/projects
+```
+
+Body
+
+```json
+{
+    "name":"Data Centre Phase 1",
+    "company":"ABC Ltd",
+    "location":"Delhi",
+    "description":"Project Description"
+}
+```
+
+---
+
+## Get All Projects
+
+GET
+
+```
+/projects
+```
+
+Response
+
+```json
+{
+  "success":true,
+  "data":[]
+}
+```
+
 Frontend
 
-      │
+Display
 
-POST /api/compliance
+- Project Name
+- Company
+- Status
+- Created Date
 
-      │
+---
 
-Express Backend
+## Project Details
 
-      │
+GET
 
-FastAPI
+```
+/projects/:projectId
+```
 
-      │
+Display
 
-Compliance Engine
+- Project Information
+- Uploaded Documents
+- Compliance
+- Reports
+- Recommendations
 
-      │
+---
 
-Risk Score
+# Documents
 
-Violations
+## Upload Document
+
+POST
+
+```
+/documents/upload
+```
+
+Content Type
+
+```
+multipart/form-data
+```
+
+Fields
+
+```
+projectId
+file
+```
+
+React Example
+
+```javascript
+const formData=new FormData();
+
+formData.append("projectId",projectId);
+
+formData.append("file",selectedFile);
+
+await axios.post(
+"/api/documents/upload",
+formData
+);
+```
+
+---
+
+## Get Documents
+
+GET
+
+```
+/documents
+```
+
+Display
+
+- File Name
+- Upload Date
+- Status
+
+---
+
+# AI Chat
+
+POST
+
+```
+/ai/chat
+```
+
+Body
+
+```json
+{
+    "documentId":"xxxx",
+    "question":"Summarize this document"
+}
+```
+
+Display
+
+```
+Question
+
+↓
+
+Loading
+
+↓
+
+AI Response
+```
+
+---
+
+# AI Search
+
+POST
+
+```
+/ai/search
+```
+
+Body
+
+```json
+{
+    "query":"Generator Capacity"
+}
+```
+
+Display
+
+Search Results
+
+---
+
+# Compliance
+
+Generate Compliance Report
+
+POST
+
+```
+/compliance
+```
+
+Body
+
+```json
+{
+    "projectId":"...",
+    "documentId":"..."
+}
+```
+
+Display
+
+- Compliance Score
+- Risk Level
+- Violations
+- Suggestions
+
+---
+
+# Recommendations
+
+Generate Recommendation
+
+POST
+
+```
+/recommendations
+```
+
+Body
+
+```json
+{
+    "projectId":"...",
+    "documentId":"..."
+}
+```
+
+Display
+
+Cards
+
+```
+Priority
+
+Category
+
+Title
+
+Description
+
+Status
+```
+
+---
+
+# Reports
+
+Generate Report
+
+POST
+
+```
+/reports
+```
+
+Body
+
+```json
+{
+    "projectId":"...",
+    "documentId":"..."
+}
+```
+
+Display
+
+- Report Title
+- Summary
+- Download Button
+
+---
+
+# Loading State
+
+Before every API call
+
+```
+Loading...
+```
+
+After Success
+
+```
+Display Data
+```
+
+After Error
+
+```
+Display Error Message
+```
+
+---
+
+# Folder Structure
+
+```
+src/
+
+components/
+
+pages/
+
+hooks/
+
+services/
+
+context/
+
+utils/
+```
+
+---
+
+# Services Folder
+
+```
+services/
+
+api.js
+
+auth.service.js
+
+project.service.js
+
+document.service.js
+
+ai.service.js
+
+compliance.service.js
+
+recommendation.service.js
+
+report.service.js
+```
+
+---
+
+# Axios Configuration
+
+```javascript
+import axios from "axios";
+
+const api=axios.create({
+    baseURL:"http://localhost:5000/api"
+});
+
+api.interceptors.request.use(config=>{
+
+const token=localStorage.getItem("token");
+
+if(token){
+
+config.headers.Authorization=`Bearer ${token}`;
+
+}
+
+return config;
+
+});
+
+export default api;
+```
+
+---
+
+# Dashboard Flow
+
+```
+Login
+
+↓
+
+Projects
+
+↓
+
+Select Project
+
+↓
+
+Documents
+
+↓
+
+Upload Document
+
+↓
+
+AI Processes Document
+
+↓
+
+Compliance
+
+↓
 
 Recommendations
 
-      │
+↓
 
-MongoDB
+Reports
 
-      │
+↓
 
-Frontend
+AI Chat
 ```
 
 ---
 
-## Report Generation
+# UI Components
 
-```
-Frontend
+## Dashboard
 
-      │
-
-POST /api/reports
-
-      │
-
-Express Backend
-
-      │
-
-FastAPI
-
-      │
-
-AI Report Generator
-
-      │
-
-Generated Report
-
-      │
-
-MongoDB
-
-      │
-
-Frontend
-```
+- Total Projects
+- Total Documents
+- Compliance Score
+- Active Risks
 
 ---
 
-# Environment Variables
+## Project Page
 
-Create a `.env` file.
-
-```env
-PORT=5000
-
-NODE_ENV=development
-
-MONGO_URI=mongodb://localhost:27017/ai-data-centre
-
-JWT_SECRET=your_secret_key
-
-AI_SERVICE_URL=http://localhost:8000/api/v1
-```
+- Project Details
+- Documents Table
+- Upload Button
 
 ---
 
-# Installation
+## Document Page
 
-Clone the repository
-
-```bash
-git clone <repository-url>
-```
-
-Install dependencies
-
-```bash
-npm install
-```
-
-Run the server
-
-```bash
-npm run dev
-```
-
-or
-
-```bash
-node server.js
-```
+- Document Viewer
+- AI Chat
+- Compliance Button
+- Recommendation Button
+- Report Button
 
 ---
 
-# API Modules
+## Compliance Page
 
-| Module | Description |
-|---------|-------------|
-| Authentication | Login & Registration |
-| Projects | Manage EPC Projects |
-| Documents | Upload & Manage Documents |
-| AI | AI Chat & Search |
-| Compliance | Compliance Analysis |
-| Recommendation | AI Recommendations |
-| Reports | AI Generated Reports |
+- Score
+- Risk Chart
+- Violations
 
 ---
 
-# Communication with AI Layer
+## Recommendation Page
 
-The backend communicates with the FastAPI microservice using Axios.
+- Recommendation Cards
+- Priority Badge
+- Status Badge
 
-Example:
+---
+
+## Report Page
+
+- Report Summary
+- Report Details
+- Download Report
+
+---
+
+# Error Handling
+
+Always handle
+
+- 400 Bad Request
+- 401 Unauthorized
+- 404 Not Found
+- 500 Internal Server Error
+
+Example
 
 ```javascript
-const { data } = await aiClient.post("/chat", payload);
+try{
+
+const response=await api.get("/projects");
+
+}catch(error){
+
+toast.error(error.response.data.message);
+
+}
 ```
 
-The backend never performs:
-
-- OCR
-- Embedding
-- LLM Processing
-- Vector Search
-- Compliance Analysis
-
-These operations are entirely handled by the FastAPI AI service.
-
 ---
 
-# Frontend Communication
+# Best Practices
 
-The frontend communicates **only** with the Express backend.
-
-```
-Frontend
-      │
-      ▼
-Express Backend
-      │
-      ▼
-FastAPI
-```
-
-The frontend never directly accesses the AI service.
-
----
-
-# Future Enhancements
-
-- AWS S3 Document Storage
-- Redis Caching
-- WebSocket Notifications
-- Background Job Queue
-- Docker Deployment
-- Kubernetes Support
-- API Gateway
-- Rate Limiting
-- Monitoring & Logging
-
----
-
-# Contributors
-
-- Backend Team
-- AI Team
-- Frontend Team
-
----
-
-# License
-
-This project is developed for the **AI Data Centre EPC Platform**.
+- Use Axios Instance
+- Store JWT Token
+- Use React Context for Authentication
+- Show Loading Indicators
+- Handle API Errors
+- Use Pagination for Large Lists
+- Refresh Data After Create/Update/Delete
+- Never call the FastAPI AI Layer directly from the frontend.
+- All requests must go through the Express backend.

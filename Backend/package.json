@@ -1,29 +1,48 @@
 {
-  "name": "backend",
+  "name": "assetflow-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Production-ready backend for AssetFlow ERP with Express, Prisma and MySQL",
+  "type": "module",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "dev": "node --watch server.js",
+    "start": "node server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
   },
-  "keywords": [],
+  "keywords": [
+    "assetflow",
+    "erp",
+    "express",
+    "prisma",
+    "mysql"
+  ],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "axios": "^1.18.1",
-    "bcrypt": "^6.0.0",
+    "@prisma/client": "^5.22.0",
     "bcryptjs": "^3.0.3",
+    "compression": "^1.8.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
+    "dayjs": "^1.1.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-list-endpoints": "^7.1.1",
+    "express-validator": "^7.1.0",
+    "form-data": "^4.0.6",
     "helmet": "^8.2.0",
     "joi": "^18.2.3",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.7.4",
     "morgan": "^1.11.0",
     "multer": "^2.2.0",
-    "path": "^0.12.7"
+    "node-cron": "^4.1.0",
+    "nodemailer": "^7.0.0",
+    "prisma": "^5.22.0",
+    "uuid": "^11.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
