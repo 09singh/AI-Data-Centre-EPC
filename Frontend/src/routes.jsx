@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
+import Register from './pages/Register'  // Add this
 import Dashboard from './pages/Dashboard'
 import ProjectHub from './pages/ProjectHub'
 import AIProjectBrain from './pages/AIProjectBrain'
@@ -31,6 +32,7 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />  // Add this
       
       {/* Protected Routes */}
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

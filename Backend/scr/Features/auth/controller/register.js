@@ -1,66 +1,59 @@
-import User from "../model.js";
-import bcrypt from "bcryptjs";
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
+import { env } from '../../../config/env.js'
+import User from '../model.js'
 
-export const getregister = async (req, res) => {
+export const register = async (req, res) => {
   try {
-    const {
-      projectname,
-      email,
-      password,
-      confirmpassword,
-      role,
-      companyName,
-    } = req.body;
-
-    if (password !== confirmpassword) {
-      return res.status(400).json({
-        success: false,
-        message: "Passwords do not match",
-      });
-    }
-
-    const existingUser = await User.findOne({ email });
-
+    const { name, email, password, role, companyName, projectName } = req.body
+    
+    // Check if user exists
+    const existingUser = await User.findOne({ email })
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "User already exists",
-      });
+        message: 'User already exists with this email'
+      })
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new User({
+    
+    // Hash password
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password, salt)
+    
+    // Create user
+    const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      role,
-
-    //   employeeCount:
-    //     role === "company"
-    //       ? Number(employeeCount)
-    //       : null,
-
-      companyName:
-        role === "Admin"
-          ? companyName
-          : null,
-    });
-
-    await newUser.save();
-
+      role: role || 'Project Manager',
+      companyName,
+      projectName
+    })
+    
+    // Generate token
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      env.JWT_SECRET,
+      { expiresIn: '7d' }
+    )
+    
     res.status(201).json({
       success: true,
-      message: "User created successfully",
-      user: newUser,
-    });
-
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        companyName: user.companyName,
+        projectName: user.projectName
+      }
+    })
+    
   } catch (error) {
-    console.error(error);
-
     res.status(500).json({
       success: false,
-      message: "Error saving user",
-    });
+      message: error.message
+    })
   }
-};
+}

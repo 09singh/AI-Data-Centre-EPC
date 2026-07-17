@@ -7,7 +7,7 @@ export const loginUser = async (credentials) => {
       localStorage.setItem('token', response.data.token)
       localStorage.setItem('user', JSON.stringify(response.data.user))
     }
-    return response.data.user
+    return response.data
   } catch (error) {
     console.error('Login error:', error)
     throw error
@@ -17,6 +17,10 @@ export const loginUser = async (credentials) => {
 export const registerUser = async (userData) => {
   try {
     const response = await api.post('/auth/register', userData)
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token)
+      localStorage.setItem('user', JSON.stringify(response.data.user))
+    }
     return response.data
   } catch (error) {
     console.error('Register error:', error)

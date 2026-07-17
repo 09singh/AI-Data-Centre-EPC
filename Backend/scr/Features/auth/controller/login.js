@@ -1,44 +1,54 @@
- import User from "../model.js";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
- export const getlogin = async (req, res) => {
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
+import { env } from '../../../config/env.js'
+import User from '../model.js'
+
+export const login = async (req, res) => {
   try {
-    const { email , password } = req.body;
-    const user = await User.findOne({ email: email.trim() });
+    const { email, password } = req.body
+    
+    // Find user from database
+    const user = await User.findOne({ email })
     if (!user) {
-      return res.json({
+      return res.status(401).json({
         success: false,
-        message: "Invalid email provided",
-      });
+        message: 'Invalid email or password'
+      })
     }
-
-    const isMatch = await bcrypt.compare(password.trim(), user.password);
+    
+    // Compare password
+    const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) {
-      return res.json({
+      return res.status(401).json({
         success: false,
-        message: "Invalid password provided",
-      });
+        message: 'Invalid email or password'
+      })
     }
-
-    console.log("Entered password:", password);
-    console.log("Database password:", user.password);
-    console.log("REQ BODY:", req.body);
-    console.log("PASSWORD:", password);
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "1h" });
+    
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      env.JWT_SECRET,
+      { expiresIn: '7d' }
+    )
+    
     res.json({
       success: true,
-      message: "Login successful",
-      token: token,
-      role: user.role
-    });
-
-  }
-  catch (error) {
-    console.log(error);
-    console.log("FULL ERROR:", error);
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        companyName: user.companyName,
+        projectName: user.projectName
+      }
+    })
+    
+  } catch (error) {
     res.status(500).json({
       success: false,
       message: error.message
-    });
+    })
   }
-};
+}

@@ -72,6 +72,14 @@ export default function Dashboard() {
   //   { phase: 'Construction', status: 'active', progress: 65 },
   //   { phase: 'Commissioning', status: 'upcoming', progress: 15 }
   // ]
+// AFTER (use data from API or fallback):
+const riskTrend = data?.riskTrend || [4, 5, 3, 6, 4, 7, 5]
+const milestoneData = data?.phases || [
+  { phase: 'Design', status: 'complete', progress: 100 },
+  { phase: 'Procurement', status: 'complete', progress: 100 },
+  { phase: 'Construction', status: 'active', progress: 65 },
+  { phase: 'Commissioning', status: 'upcoming', progress: 15 }
+]
 
   return (
     <Layout>
