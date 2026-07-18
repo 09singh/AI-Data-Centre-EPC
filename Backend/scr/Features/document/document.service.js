@@ -17,6 +17,19 @@ export const uploadDocument = async (req) => {
     aiStatus: "processing",
   });
 
+
+    try {
+      await aiService.uploadDocument(req.file.path);
+      document.aiStatus = "indexed";
+      await document.save();
+      console.log(`✅ Document ${documentId} indexed in AI service`);
+    } catch (err) {
+      console.error(`❌ Failed to index document ${documentId}:`, err.message);
+      document.aiStatus = "failed";
+      await document.save();
+      // Don't throw - document is still saved, just not indexed
+    }
+
   try {
     await aiService.uploadDocument(
       req.file.path,

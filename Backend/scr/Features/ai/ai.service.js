@@ -7,9 +7,6 @@ export const health = async () => {
   return data;
 };
 
-// AI FastAPI upload expects:
-// POST /api/v1/upload  (mounted at /api/v1)
-// multipart/form-data with field name: `file`
 export const uploadDocument = async (filePath) => {
   const form = new FormData();
   form.append("file", fs.createReadStream(filePath));
@@ -24,7 +21,16 @@ export const uploadDocument = async (filePath) => {
 };
 
 export const chat = async (payload) => {
-  const { data } = await aiClient.post("/chat", payload);
+  // AI service expects: { query, filters, session_id }
+  const requestBody = {
+    query: payload.question || payload.query || payload.text || '',
+    filters: payload.filters || {},
+    session_id: payload.session_id || `session_${Date.now()}`
+  };
+  
+  console.log('[AI Chat Request]', requestBody);
+  
+  const { data } = await aiClient.post("/chat", requestBody);
   return data;
 };
 
@@ -59,4 +65,3 @@ const aiService = {
 };
 
 export default aiService;
-
