@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation } from 'react-router-dom'  // Add this
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import Layout from '../components/Layout'
 import { askAIManager, getAIHealth } from '../services/AIAPI'
 
@@ -10,8 +10,6 @@ export default function AIProjectBrain() {
   const [isSending, setIsSending] = useState(false)
   const [health, setHealth] = useState(null)
   const [docContext, setDocContext] = useState(null)
-
-  const abortRef = useRef(null)
 
   // Check if coming from document click
   useEffect(() => {
@@ -119,7 +117,7 @@ export default function AIProjectBrain() {
           </div>
           {docContext && (
             <div className="text-xs px-2 py-1.5 rounded-lg bg-[var(--accent-soft)] text-[var(--accent)] mb-1">
-              <p className="m-0 font-medium">📄 Document Context</p>
+              <p className="m-0 font-medium">Document Context</p>
               <p className="m-0 text-[10px] truncate">{docContext.documentName}</p>
               <button 
                 onClick={handleClearContext}

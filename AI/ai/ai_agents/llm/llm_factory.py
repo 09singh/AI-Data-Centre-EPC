@@ -4,18 +4,14 @@ from ai.ai_agents.llm.groq_client import GroqClient
 
 
 class LLMFactory:
-    """Factory pattern to resolve and load LLM Clients.
-
-    Decoupled interface allows future transitions to OpenAI, Claude,
-    Gemini, or Ollama without modifying orchestrators.
-    """
+    """Factory pattern to resolve the active Groq LLM client."""
 
     @staticmethod
     def get_client(provider_name: str) -> LLMClientInterface:
         """Instantiates and returns the designated provider client.
 
         Args:
-            provider_name: Selected provider ('groq', 'openai', 'claude', 'gemini', 'ollama').
+            provider_name: Selected provider. Only 'groq' is active.
 
         Returns:
             LLMClientInterface: Concrete LLM client.
@@ -25,18 +21,6 @@ class LLMFactory:
 
         if normalized == "groq":
             return GroqClient()
-        elif normalized == "openai":
-            logger.info("Selected OpenAI client. Routing to Groq client wrapper placeholder.")
-            return GroqClient()
-        elif normalized in ["claude", "anthropic"]:
-            logger.info("Selected Claude client. Routing to Groq client wrapper placeholder.")
-            return GroqClient()
-        elif normalized in ["gemini", "google"]:
-            logger.info("Selected Gemini client. Routing to Groq client wrapper placeholder.")
-            return GroqClient()
-        elif normalized == "ollama":
-            logger.info("Selected Ollama client. Routing to Groq client wrapper placeholder.")
-            return GroqClient()
-        else:
-            logger.warning("Unrecognized LLM provider: '{}'. Defaulting to GroqClient.", provider_name)
-            return GroqClient()
+
+        logger.warning("Unsupported LLM provider: '{}'. Using GroqClient with approved OSS models.", provider_name)
+        return GroqClient()

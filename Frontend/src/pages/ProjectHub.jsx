@@ -5,14 +5,15 @@ import Loader from '../components/Loader'
 import UploadBox from '../components/UploadBox'
 import { Button } from '../components/Buttons'
 import { getDocuments, uploadDocument } from '../services/DocumentAPI'
-import { getProjectSummary } from '../services/ProjectAPI'
+import { getProjectSummary, getProjectSchedule, getProjectVendors, getProjectEquipment } from '../services/ProjectAPI'
+import { useProject } from '../context/ProjectContext'
 
 export default function ProjectHub() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { selectedProject, setSelectedProject } = useProject()
   const [documents, setDocuments] = useState(null)
   const [projectData, setProjectData] = useState(null)
-  const [selectedProject, setSelectedProject] = useState(null)
   const [selectedDoc, setSelectedDoc] = useState(null)
 
   const [selectedEquipment, setSelectedEquipment] = useState(null)
@@ -31,9 +32,23 @@ export default function ProjectHub() {
   const [activeTab, setActiveTab] = useState(getActiveTab())
 
   useEffect(() => {
+    const loadProjectData = async () => {
+      const summary = await getProjectSummary(selectedProject?._id || null)
+      setProjectData(summary)
+      if (selectedProject?._id) {
+        const [schedule, vendors, equipment] = await Promise.all([
+          getProjectSchedule(selectedProject._id),
+          getProjectVendors(selectedProject._id),
+          getProjectEquipment(selectedProject._id)
+        ])
+        setTasks(schedule || [])
+        setVendorsData(vendors || [])
+        setEquipmentData(equipment || [])
+      }
+    }
     getDocuments().then(setDocuments)
-    getProjectSummary().then(setProjectData)
-  }, [])
+    loadProjectData()
+  }, [selectedProject?._id])
 
   useEffect(() => {
     setActiveTab(getActiveTab())
@@ -90,144 +105,9 @@ export default function ProjectHub() {
   const tabs = ['documents', 'schedule', 'vendors', 'equipment']
 
   // Schedule Tasks Data - Kanban Board
-  const [tasks, setTasks] = useState([
-    {
-      id: 'T-001',
-      title: 'Switchgear Installation',
-      description: 'Install switchgear units A and B in electrical room',
-      status: 'In Progress',
-      priority: 'High',
-      dueDate: '2026-07-25',
-      assignedTeam: 'Electrical Team',
-      dependencies: ['Foundation Complete', 'Switchgear Delivery'],
-      progress: 65,
-      category: 'Equipment Installation',
-      documents: ['switchgear_manual.pdf', 'installation_guide.pdf'],
-      vendor: 'Voltage Systems Inc.',
-      equipment: ['Switchgear Unit A', 'Switchgear Unit B'],
-      aiInsight: 'Installation is progressing well. Ensure torque specifications are followed.',
-      recoverySuggestion: null
-    },
-    {
-      id: 'T-002',
-      title: 'Cooling Tower Commissioning',
-      description: 'Complete testing and commissioning of cooling tower 1',
-      status: 'Delayed',
-      priority: 'Critical',
-      dueDate: '2026-07-20',
-      assignedTeam: 'Mechanical Team',
-      dependencies: ['Cooling Tower Installation', 'Water Supply Connection'],
-      progress: 40,
-      category: 'Commissioning',
-      documents: ['cooling_specs.pdf', 'test_procedure.pdf'],
-      vendor: 'CoolFlow Engineering',
-      equipment: ['Cooling Tower 1'],
-      aiInsight: 'Pressure imbalance detected. Recalibration required before proceeding.',
-      recoverySuggestion: 'Recalibrate cooling loop valves and re-run pressure test. Estimated 2 days to resolve.'
-    },
-    {
-      id: 'T-003',
-      title: 'UPS System Testing',
-      description: 'Perform load transfer testing on UPS modules',
-      status: 'At Risk',
-      priority: 'High',
-      dueDate: '2026-07-28',
-      assignedTeam: 'Power Systems Team',
-      dependencies: ['UPS Installation', 'Battery Bank Installation'],
-      progress: 50,
-      category: 'Testing',
-      documents: ['ups_specs.pdf', 'test_procedure.pdf'],
-      vendor: 'Voltage Systems Inc.',
-      equipment: ['UPS Module 1', 'UPS Module 2'],
-      aiInsight: 'Firmware mismatch detected. Update required before load testing.',
-      recoverySuggestion: 'Update UPS firmware to version 3.2.1. Schedule maintenance window.'
-    },
-    {
-      id: 'T-004',
-      title: 'Generator Installation',
-      description: 'Install and connect generator set G1',
-      status: 'Upcoming',
-      priority: 'Medium',
-      dueDate: '2026-08-10',
-      assignedTeam: 'Power Systems Team',
-      dependencies: ['Foundation Ready', 'Fuel System Installation'],
-      progress: 0,
-      category: 'Equipment Installation',
-      documents: ['generator_specs.pdf', 'installation_manual.pdf'],
-      vendor: 'PowerGen Solutions',
-      equipment: ['Generator Set G1'],
-      aiInsight: 'Ensure proper ventilation and exhaust connections before installation.',
-      recoverySuggestion: null
-    },
-    {
-      id: 'T-005',
-      title: 'Fire System Integration',
-      description: 'Integrate fire suppression system with building management',
-      status: 'Completed',
-      priority: 'High',
-      dueDate: '2026-07-10',
-      assignedTeam: 'Safety Team',
-      dependencies: ['Fire System Installation', 'BMS Configuration'],
-      progress: 100,
-      category: 'Integration',
-      documents: ['fire_system_specs.pdf', 'integration_guide.pdf'],
-      vendor: 'FireSafe Technologies',
-      equipment: ['Fire Suppression System'],
-      aiInsight: 'All tests passed. System is fully operational.',
-      recoverySuggestion: null
-    },
-    {
-      id: 'T-006',
-      title: 'Steel Structure Erection',
-      description: 'Complete steel structure erection for main building',
-      status: 'Delayed',
-      priority: 'Critical',
-      dueDate: '2026-07-15',
-      assignedTeam: 'Structural Team',
-      dependencies: ['Foundation Complete', 'Steel Delivery'],
-      progress: 55,
-      category: 'Construction',
-      documents: ['structural_drawings.pdf', 'erection_plan.pdf'],
-      vendor: 'SteelCore Industries',
-      equipment: ['Structural Steel'],
-      aiInsight: 'Steel delivery delay causing 6 days slippage. Resequencing recommended.',
-      recoverySuggestion: 'Accelerate grading and permitting to recover 12 of 18 delay days.'
-    },
-    {
-      id: 'T-007',
-      title: 'Network Cabling',
-      description: 'Install network cabling for IT infrastructure',
-      status: 'Upcoming',
-      priority: 'Medium',
-      dueDate: '2026-08-20',
-      assignedTeam: 'IT Team',
-      dependencies: ['Structure Complete', 'Cable Tray Installation'],
-      progress: 0,
-      category: 'IT Infrastructure',
-      documents: ['network_design.pdf', 'cabling_specs.pdf'],
-      vendor: null,
-      equipment: ['Network Cables'],
-      aiInsight: 'Plan cable routes carefully to avoid interference with power lines.',
-      recoverySuggestion: null
-    },
-    {
-      id: 'T-008',
-      title: 'Cooling System Testing',
-      description: 'Complete full cooling system performance test',
-      status: 'In Progress',
-      priority: 'High',
-      dueDate: '2026-07-30',
-      assignedTeam: 'Mechanical Team',
-      dependencies: ['Cooling Tower Commissioning', 'Chiller Installation'],
-      progress: 35,
-      category: 'Testing',
-      documents: ['cooling_test_procedure.pdf', 'performance_specs.pdf'],
-      vendor: 'CoolFlow Engineering',
-      equipment: ['Cooling Tower 1', 'Chiller Unit 2'],
-      aiInsight: 'Multiple pressure readings showing imbalance. Investigate valve settings.',
-      recoverySuggestion: 'Check all valve positions and recalibrate pressure sensors.'
-    }
-  ])
+  const [tasks, setTasks] = useState([])
+  const [vendorsData, setVendorsData] = useState([])
+  const [equipmentData, setEquipmentData] = useState([])
 
   // Get status columns
   const getStatusColumns = () => {
@@ -887,128 +767,3 @@ export default function ProjectHub() {
   )
 }
 
-// Vendors Data
-const vendorsData = [
-  {
-    id: 'V-001',
-    name: 'Voltage Systems Inc.',
-    equipment: ['Switchgear Unit A', 'UPS Module 1'],
-    contact: 'contact@voltagesystems.com',
-    status: 'Active',
-    deliveryStatus: 'On Track',
-    expectedDelivery: '2026-07-20',
-    reliabilityScore: 92,
-    completedOrders: 8,
-    issues: 0
-  },
-  {
-    id: 'V-002',
-    name: 'CoolFlow Engineering',
-    equipment: ['Cooling Tower 1'],
-    contact: 'info@coolflow.com',
-    status: 'Active',
-    deliveryStatus: 'Delayed',
-    expectedDelivery: '2026-07-25',
-    reliabilityScore: 78,
-    completedOrders: 5,
-    issues: 2
-  },
-  {
-    id: 'V-003',
-    name: 'PowerGen Solutions',
-    equipment: ['Generator Set G1'],
-    contact: 'sales@powergen.com',
-    status: 'Active',
-    deliveryStatus: 'On Track',
-    expectedDelivery: '2026-08-10',
-    reliabilityScore: 88,
-    completedOrders: 12,
-    issues: 1
-  },
-  {
-    id: 'V-004',
-    name: 'FireSafe Technologies',
-    equipment: ['Fire Suppression System'],
-    contact: 'support@firesafe.com',
-    status: 'Completed',
-    deliveryStatus: 'Delivered',
-    expectedDelivery: '2026-06-30',
-    reliabilityScore: 95,
-    completedOrders: 6,
-    issues: 0
-  }
-]
-
-// Equipment Data
-const equipmentData = [
-  {
-    id: 'EQ-001',
-    name: 'Switchgear Unit A',
-    type: 'Electrical',
-    model: 'SG-2000',
-    vendor: 'Voltage Systems Inc.',
-    quantity: 2,
-    status: 'Installed',
-    installationStatus: 'Installed',
-    testingStatus: 'Passed',
-    specifications: '2000A, 480V, 3-Phase',
-    documents: ['specifications.pdf', 'test_report_A.pdf'],
-    maintenanceHistory: 'Last serviced: Jun 2026'
-  },
-  {
-    id: 'EQ-002',
-    name: 'Cooling Tower 1',
-    type: 'Mechanical',
-    model: 'CT-1500',
-    vendor: 'CoolFlow Engineering',
-    quantity: 3,
-    status: 'In Progress',
-    installationStatus: 'In Progress',
-    testingStatus: 'Failed',
-    specifications: '1500 TR, Evaporative Cooling',
-    documents: ['cooling_specs.pdf'],
-    maintenanceHistory: 'Installation in progress'
-  },
-  {
-    id: 'EQ-003',
-    name: 'Generator Set G1',
-    type: 'Power',
-    model: 'GEN-3000',
-    vendor: 'PowerGen Solutions',
-    quantity: 2,
-    status: 'Not Installed',
-    installationStatus: 'Not Installed',
-    testingStatus: 'Pending',
-    specifications: '3000kW, Diesel Generator',
-    documents: ['generator_specs.pdf'],
-    maintenanceHistory: 'Awaiting installation'
-  },
-  {
-    id: 'EQ-004',
-    name: 'UPS Module 1',
-    type: 'Power',
-    model: 'UPS-500',
-    vendor: 'Voltage Systems Inc.',
-    quantity: 4,
-    status: 'Commissioned',
-    installationStatus: 'Commissioned',
-    testingStatus: 'Passed',
-    specifications: '500kVA, 480V',
-    documents: ['ups_specs.pdf', 'commissioning_report.pdf'],
-    maintenanceHistory: 'Commissioned: Jul 2026'
-  },
-  {
-    id: 'EQ-005',
-    name: 'Fire Suppression System',
-    type: 'Safety',
-    model: 'FSS-200',
-    vendor: 'FireSafe Technologies',
-    quantity: 1,
-    status: 'Commissioned',
-    installationStatus: 'Commissioned',
-    testingStatus: 'Passed',
-    specifications: 'FM-200 Gas Suppression',
-    documents: ['fire_system_specs.pdf'],
-    maintenanceHistory: 'Certified: Jun 2026'
-  }
-]

@@ -147,7 +147,7 @@ def test_groq_client_generate(mock_groq):
 
     assert res.content == "This design complies with the 2-hour fire wall standard."
     assert res.token_usage.total_tokens == 120
-    assert res.model_name == "meta-llama/llama-4-scout-17b-16e-instruct"
+    assert res.model_name in {"openai/gpt-oss-20b", "openai/gpt-oss-120b"}
     assert mock_groq.chat.completions.create.called
 
 
@@ -158,6 +158,34 @@ def test_groq_client_error(mock_groq):
 
     with pytest.raises(GroqError):
         client.generate([{"role": "user", "content": "Test"}])
+
+
+def test_groq_client_falls_back_to_alternate_model_when_primary_is_unavailable():
+    """Verifies Groq Client retries with an alternate model when the primary one is unavailable."""
+    with patch("ai.ai_agents.llm.groq_client.Groq") as mock_class:
+        mock_instance = MagicMock()
+        mock_class.return_value = mock_instance
+
+        mock_failure = Exception("The model `openai/gpt-oss-20b` does not exist")
+        mock_completion = MagicMock()
+        mock_completion.id = "chatcmpl_fallback"
+        mock_completion.choices = [MagicMock()]
+        mock_completion.choices[0].message.content = "Fallback response"
+
+        mock_usage = MagicMock()
+        mock_usage.prompt_tokens = 10
+        mock_usage.completion_tokens = 20
+        mock_usage.total_tokens = 30
+        mock_completion.usage = mock_usage
+
+        mock_instance.chat.completions.create.side_effect = [mock_failure, mock_completion]
+
+        client = GroqClient(api_key="mock_key")
+        response = client.generate([{"role": "user", "content": "Test"}])
+
+        assert response.content == "Fallback response"
+        assert mock_instance.chat.completions.create.call_count == 2
+        assert mock_instance.chat.completions.create.call_args_list[0].kwargs["model"] != mock_instance.chat.completions.create.call_args_list[1].kwargs["model"]
 
 
 def test_orchestrator_pipeline(mock_groq):

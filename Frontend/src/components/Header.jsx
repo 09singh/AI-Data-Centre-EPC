@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom'
 import { BellIcon } from '@heroicons/react/24/outline'
 import { useTheme } from '../context/ThemeContext'
+import { useProject } from '../context/ProjectContext'
 import ProfileMenu from './ProfileMenu'
 
 export default function Header() {
   const { theme } = useTheme()
+  const { selectedProject, projects, setSelectedProject } = useProject()
 
   // Map theme to logo file
   const getLogo = () => {
@@ -33,9 +35,25 @@ export default function Header() {
           </div>
           <span className="text-base font-semibold text-[var(--text)]">EPC AI Manager</span>
         </Link>
-        <span className="text-xs text-[var(--muted)] pl-3 border-l border-[var(--border)]">
-          Riverbend Data Centre
-        </span>
+        <div className="pl-3 border-l border-[var(--border)]">
+          <select
+            value={selectedProject?._id || ''}
+            onChange={(e) => setSelectedProject(e.target.value)}
+            className="max-w-[240px] truncate rounded-md border border-[var(--border)] bg-[var(--panel)] px-2 py-1 text-xs text-[var(--text)] outline-none transition-colors focus:border-[var(--accent)]"
+            aria-label="Select active project"
+            title={selectedProject?.name || 'Select active project'}
+          >
+            {projects.length === 0 ? (
+              <option value="">No projects</option>
+            ) : (
+              projects.map((project) => (
+                <option key={project._id} value={project._id}>
+                  {project.name}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
       </div>
 
       <div className="flex items-center gap-3">

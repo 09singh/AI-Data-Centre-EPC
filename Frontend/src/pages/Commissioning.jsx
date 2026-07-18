@@ -1,146 +1,35 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Layout from '../components/Layout'
 import { Button } from '../components/Buttons'
+import { getProjectCommissioning } from '../services/ProjectAPI'
+import { useProject } from '../context/ProjectContext'
 
 export default function Commissioning() {
+  const { selectedProject } = useProject()
   const [selectedSystem, setSelectedSystem] = useState(null)
   const [showNCRModal, setShowNCRModal] = useState(null)
+  const [data, setData] = useState({ readinessScore: 0, systems: [], ncrData: [], timeline: [], aiRecommendations: [] })
 
-  // Commissioning Readiness Data
+  useEffect(() => {
+    const loadData = async () => {
+      if (!selectedProject?._id) return
+      const commissioning = await getProjectCommissioning(selectedProject._id)
+      setData(commissioning || { readinessScore: 0, systems: [], ncrData: [], timeline: [], aiRecommendations: [] })
+    }
+    loadData()
+  }, [selectedProject?._id])
+
   const readinessData = {
-    score: 86,
-    readyForHandover: true,
-    overallCompletion: 82,
-    remainingCriticalTests: 3
+    score: data.readinessScore || 0,
+    readyForHandover: data.readyForHandover || false,
+    overallCompletion: data.overallCompletion || 0,
+    remainingCriticalTests: data.remainingCriticalTests || 0
   }
 
-  // System Testing Data
-  const systems = [
-    {
-      id: 'power',
-      name: 'Power Systems',
-      icon: 'ti-bolt',
-      total: 24,
-      passed: 20,
-      failed: 2,
-      pending: 2,
-      status: 'In Progress',
-      color: 'var(--warning)'
-    },
-    {
-      id: 'cooling',
-      name: 'Cooling Systems',
-      icon: 'ti-snowflake',
-      total: 18,
-      passed: 14,
-      failed: 3,
-      pending: 1,
-      status: 'In Progress',
-      color: 'var(--warning)'
-    },
-    {
-      id: 'network',
-      name: 'Network & IT',
-      icon: 'ti-network',
-      total: 30,
-      passed: 28,
-      failed: 0,
-      pending: 2,
-      status: 'In Progress',
-      color: 'var(--warning)'
-    },
-    {
-      id: 'fire',
-      name: 'Fire Safety',
-      icon: 'ti-fire-extinguisher',
-      total: 12,
-      passed: 12,
-      failed: 0,
-      pending: 0,
-      status: 'Completed',
-      color: 'var(--success)'
-    },
-    {
-      id: 'backup',
-      name: 'Backup Systems',
-      icon: 'ti-device-floppy',
-      total: 15,
-      passed: 10,
-      failed: 1,
-      pending: 4,
-      status: 'In Progress',
-      color: 'var(--warning)'
-    }
-  ]
-
-  // Non-Conformance (NCR) Data
-  const ncrData = [
-    {
-      id: 'NCR-001',
-      issue: 'UPS Load Transfer Time Exceeds Specification',
-      severity: 'Critical',
-      engineer: 'Jane Smith',
-      status: 'In Progress',
-      date: '2026-07-09'
-    },
-    {
-      id: 'NCR-002',
-      issue: 'Cooling Tower Pressure Mismatch',
-      severity: 'High',
-      engineer: 'Mike Johnson',
-      status: 'Open',
-      date: '2026-07-09'
-    },
-    {
-      id: 'NCR-003',
-      issue: 'Generator Auto-Start Failure',
-      severity: 'High',
-      engineer: 'John Doe',
-      status: 'Open',
-      date: '2026-07-08'
-    },
-    {
-      id: 'NCR-004',
-      issue: 'Fire Panel Communication Error',
-      severity: 'Medium',
-      engineer: 'Sarah Williams',
-      status: 'Resolved',
-      date: '2026-07-07'
-    }
-  ]
-
-  // Commissioning Timeline
-  const timeline = [
-    { phase: 'Power Testing', status: 'completed', date: '2026-07-05' },
-    { phase: 'Cooling Testing', status: 'in-progress', date: '2026-07-09' },
-    { phase: 'Fire System Testing', status: 'completed', date: '2026-07-07' },
-    { phase: 'Integrated System Testing', status: 'pending', date: '2026-07-12' },
-    { phase: 'Final Client Acceptance', status: 'pending', date: '2026-07-15' }
-  ]
-
-  // AI Recommendations
-  const aiRecommendations = [
-    {
-      title: 'Cooling System Test Failed',
-      description: 'Pressure imbalance detected. Recalibrate the cooling loop before performing Integrated System Testing to avoid cascading failures.',
-      priority: 'Critical'
-    },
-    {
-      title: 'UPS Firmware Update Required',
-      description: 'Update UPS firmware to resolve load transfer timing issues. This will resolve NCR-001.',
-      priority: 'High'
-    },
-    {
-      title: 'Generator Battery Replacement',
-      description: 'Replace generator batteries to ensure auto-start functionality. Estimated 2-hour maintenance window required.',
-      priority: 'High'
-    },
-    {
-      title: 'Ready for Handover',
-      description: 'All critical systems have passed or are on track. Project is estimated to be ready for final handover in 5 days.',
-      priority: 'Low'
-    }
-  ]
+  const systems = (data.systems || []).map((system) => ({ ...system, icon: system.id === 'power' ? 'ti-bolt' : system.id === 'cooling' ? 'ti-snowflake' : system.id === 'network' ? 'ti-network' : 'ti-device-floppy', color: 'var(--warning)' }))
+  const ncrData = data.ncrData || []
+  const timeline = data.timeline || []
+  const aiRecommendations = data.aiRecommendations || []
 
   const getStatusBadge = (status) => {
     const configs = {

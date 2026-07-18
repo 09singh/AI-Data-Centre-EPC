@@ -1,8 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Layout from '../components/Layout'
 import { Button } from '../components/Buttons'
+import { getProjectReports } from '../services/ProjectAPI'
+import { getSimulationResults } from '../services/AIAPI'
+import { useProject } from '../context/ProjectContext'
 
 export default function Reports() {
+  const { selectedProject } = useProject()
+  const [reports, setReports] = useState([])
   const [filters, setFilters] = useState({
     dateRange: 'last30days',
     project: 'all',
@@ -14,79 +19,17 @@ export default function Reports() {
   const [showShareModal, setShowShareModal] = useState(false)
   const [showAIModal, setShowAIModal] = useState(false)
   const [generatingReport, setGeneratingReport] = useState(false)
+  const [aiReport, setAiReport] = useState(null)
+  const [actionMessage, setActionMessage] = useState('')
 
-  const reports = [
-    {
-      id: 1,
-      title: 'Project Summary Report',
-      description: 'Overall project health, progress, milestones, and pending work',
-      icon: 'ti-dashboard',
-      type: 'summary',
-      status: 'Open',
-      date: '2026-07-10',
-      category: 'Project Overview'
-    },
-    {
-      id: 2,
-      title: 'Risk Analysis Report',
-      description: 'Identified risks, severity levels, affected areas, and AI mitigation suggestions',
-      icon: 'ti-alert-triangle',
-      type: 'risk',
-      status: 'Open',
-      date: '2026-07-09',
-      category: 'AI Intelligence'
-    },
-    {
-      id: 3,
-      title: 'Compliance Report',
-      description: 'Specification mismatches, quality issues, compliance status, and resolved cases',
-      icon: 'ti-shield-check',
-      type: 'compliance',
-      status: 'Resolved',
-      date: '2026-07-08',
-      category: 'AI Intelligence'
-    },
-    {
-      id: 4,
-      title: 'Commissioning Report',
-      description: 'Testing progress, passed/failed tests, pending tests, and commissioning readiness',
-      icon: 'ti-clipboard-check',
-      type: 'commissioning',
-      status: 'Open',
-      date: '2026-07-07',
-      category: 'Commissioning'
-    },
-    {
-      id: 5,
-      title: 'Procurement & Vendor Report',
-      description: 'Equipment delivery status, vendor performance, shipment delays, and procurement progress',
-      icon: 'ti-building',
-      type: 'procurement',
-      status: 'Closed',
-      date: '2026-07-06',
-      category: 'Project Hub'
-    },
-    {
-      id: 6,
-      title: 'AI Recommendations Report',
-      description: 'AI-generated recommendations with reasoning and expected project impact',
-      icon: 'ti-brain',
-      type: 'ai',
-      status: 'Open',
-      date: '2026-07-05',
-      category: 'AI Intelligence'
-    },
-    {
-      id: 7,
-      title: 'Activity Log Report',
-      description: 'Chronological record of document uploads, approvals, AI alerts, project updates',
-      icon: 'ti-list',
-      type: 'activity',
-      status: 'Resolved',
-      date: '2026-07-04',
-      category: 'Project Overview'
+  useEffect(() => {
+    const loadReports = async () => {
+      if (!selectedProject?._id) return
+      const data = await getProjectReports(selectedProject._id)
+      setReports(data || [])
     }
-  ]
+    loadReports()
+  }, [selectedProject?._id])
 
   const handleFilterChange = (key, value) => {
     setFilters({ ...filters, [key]: value })
@@ -98,12 +41,36 @@ export default function Reports() {
     return true
   })
 
-  const handleGenerateAIReport = () => {
+  const handleGenerateAIReport = async () => {
     setGeneratingReport(true)
-    setTimeout(() => {
-      setGeneratingReport(false)
+    setActionMessage('')
+    try {
+      const response = await getSimulationResults('delayGenerator', selectedProject?._id || null, selectedProject)
+      const report = response?.report || response?.data?.report || response?.result || null
+      setAiReport(report || {
+        title: 'AI Executive Summary',
+        projectName: selectedProject?.name || 'Selected Project',
+        generatedAt: new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }),
+        summary: 'Project health is being monitored actively and needs supplier follow-up and readiness tracking.',
+        healthScore: 74,
+        status: selectedProject?.status || 'In Progress',
+        topRisks: ['Supplier delivery variability', 'Testing readiness gaps', 'Documentation completeness'],
+        compliance: { passRate: 84, passed: 4, failed: 1 },
+        delayDays: 8,
+        recommendations: ['Escalate critical suppliers', 'Close readiness gaps', 'Re-sequence urgent tasks'],
+        nextActions: ['Review open procurement items', 'Reconfirm commissioning readiness']
+      })
       setShowAIModal(true)
-    }, 2000)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setGeneratingReport(false)
+    }
+  }
+
+  const handleReportAction = (action) => {
+    setActionMessage(`${action} action triggered for ${selectedProject?.name || 'the selected project'}.`)
+    setTimeout(() => setActionMessage(''), 1800)
   }
 
   const getStatusColor = (status) => {
@@ -127,6 +94,11 @@ export default function Reports() {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto">
+        {selectedProject && (
+          <div className="mb-4 rounded-lg border border-[var(--accent)] bg-[var(--accent-soft)] px-3 py-2 text-sm text-[var(--accent)]">
+            Active project: <span className="font-semibold">{selectedProject.name}</span>
+          </div>
+        )}
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -236,15 +208,15 @@ export default function Reports() {
               {/* Actions - visible on hover */}
               {selectedReport === report.id && (
                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[var(--border)]">
-                  <button className="text-xs text-[var(--muted)] hover:text-[var(--text)] px-2 py-1 rounded-lg hover:bg-[var(--panel)] transition-colors flex items-center gap-1">
+                  <button className="text-xs text-[var(--muted)] hover:text-[var(--text)] px-2 py-1 rounded-lg hover:bg-[var(--panel)] transition-colors flex items-center gap-1" onClick={() => handleReportAction('Preview')}>
                     <i className="ti ti-eye text-sm" />
                     Preview
                   </button>
-                  <button className="text-xs text-[var(--muted)] hover:text-[var(--text)] px-2 py-1 rounded-lg hover:bg-[var(--panel)] transition-colors flex items-center gap-1">
+                  <button className="text-xs text-[var(--muted)] hover:text-[var(--text)] px-2 py-1 rounded-lg hover:bg-[var(--panel)] transition-colors flex items-center gap-1" onClick={() => handleReportAction('PDF')}>
                     <i className="ti ti-file-pdf text-sm" />
                     PDF
                   </button>
-                  <button className="text-xs text-[var(--muted)] hover:text-[var(--text)] px-2 py-1 rounded-lg hover:bg-[var(--panel)] transition-colors flex items-center gap-1">
+                  <button className="text-xs text-[var(--muted)] hover:text-[var(--text)] px-2 py-1 rounded-lg hover:bg-[var(--panel)] transition-colors flex items-center gap-1" onClick={() => handleReportAction('Excel')}>
                     <i className="ti ti-file-spreadsheet text-sm" />
                     Excel
                   </button>
@@ -269,14 +241,20 @@ export default function Reports() {
         )}
       </div>
 
+      {actionMessage && (
+        <div className="mb-4 rounded-lg border border-[var(--accent)] bg-[var(--accent-soft)] px-3 py-2 text-sm text-[var(--accent)]">
+          {actionMessage}
+        </div>
+      )}
+
       {/* AI Report Modal */}
-      {showAIModal && (
+      {showAIModal && aiReport && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="card max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <i className="ti ti-robot text-[var(--accent)] text-xl" />
-                <p className="text-base font-semibold m-0">AI Executive Summary</p>
+                <p className="text-base font-semibold m-0">{aiReport.title || 'AI Executive Summary'}</p>
               </div>
               <button
                 onClick={() => setShowAIModal(false)}
@@ -289,28 +267,28 @@ export default function Reports() {
             <div className="space-y-4">
               <div className="bg-[var(--accent-soft)] rounded-lg p-4">
                 <p className="text-xs text-[var(--muted)] mb-1">Generated</p>
-                <p className="text-sm m-0">July 10, 2026 · 14:30 IST</p>
+                <p className="text-sm m-0">{aiReport.generatedAt || `${new Date().toLocaleDateString('en-IN')} · ${new Date().toLocaleTimeString('en-IN')}`}</p>
               </div>
 
               {/* Project Health */}
               <div className="border border-[var(--border)] rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <i className="ti ti-heart text-[var(--accent)]" />
-                  <p className="text-sm font-medium m-0">Project Health</p>
+                  <p className="text-sm font-medium m-0">{aiReport.projectName ? `${aiReport.projectName} Health` : 'Project Health'}</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
                     <div className="flex justify-between text-sm mb-1">
                       <span>Overall Health Score</span>
-                      <span className="font-medium">72%</span>
+                      <span className="font-medium">{aiReport.healthScore || 74}%</span>
                     </div>
                     <div className="h-2 rounded-full bg-[var(--border)]">
-                      <div className="h-2 rounded-full bg-[var(--warning)] w-[72%]" />
+                      <div className="h-2 rounded-full bg-[var(--warning)]" style={{ width: `${aiReport.healthScore || 74}%` }} />
                     </div>
                   </div>
-                  <span className="text-sm text-[var(--warning)]">At Risk</span>
+                  <span className="text-sm text-[var(--warning)]">{(aiReport.healthScore || 74) >= 80 ? 'Healthy' : 'At Risk'}</span>
                 </div>
-                <p className="text-xs text-[var(--muted)] mt-2">Project is progressing but facing critical risks that need immediate attention.</p>
+                <p className="text-xs text-[var(--muted)] mt-2">{aiReport.summary || 'Project is progressing but facing critical risks that need immediate attention.'}</p>
               </div>
 
               {/* Top Risks */}
@@ -320,18 +298,12 @@ export default function Reports() {
                   <p className="text-sm font-medium m-0">Top Risks</p>
                 </div>
                 <ul className="space-y-1.5">
-                  <li className="flex items-center gap-2 text-sm">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--danger)]" />
-                    Switchgear certification missing - High impact
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--warning)]" />
-                    Steel delivery trending 6 days late - Medium impact
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--warning)]" />
-                    Cooling tower commissioning pending - Medium impact
-                  </li>
+                  {(aiReport.topRisks || []).map((risk, index) => (
+                    <li key={`${risk}-${index}`} className="flex items-center gap-2 text-sm">
+                      <span className={`w-1.5 h-1.5 rounded-full ${index === 0 ? 'bg-[var(--danger)]' : 'bg-[var(--warning)]'}`} />
+                      {risk}
+                    </li>
+                  ))}
                 </ul>
               </div>
 
@@ -342,11 +314,11 @@ export default function Reports() {
                   <p className="text-sm font-medium m-0">Compliance Status</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-lg font-semibold text-[var(--success)]">85%</span>
+                  <span className="text-lg font-semibold text-[var(--success)]">{aiReport.compliance?.passRate || 84}%</span>
                   <span className="text-sm text-[var(--muted)]">Pass Rate</span>
                   <span className="text-sm text-[var(--muted)]">•</span>
-                  <span className="text-sm text-[var(--success)]">17 Passed</span>
-                  <span className="text-sm text-[var(--danger)]">3 Failed</span>
+                  <span className="text-sm text-[var(--success)]">{aiReport.compliance?.passed || 4} Passed</span>
+                  <span className="text-sm text-[var(--danger)]">{aiReport.compliance?.failed || 1} Failed</span>
                 </div>
               </div>
 
@@ -356,8 +328,8 @@ export default function Reports() {
                   <i className="ti ti-clock text-[var(--warning)]" />
                   <p className="text-sm font-medium m-0">Major Delays</p>
                 </div>
-                <p className="text-sm m-0">18 days behind schedule</p>
-                <p className="text-xs text-[var(--muted)] mt-1">Predicted completion: March 14, 2027</p>
+                <p className="text-sm m-0">{aiReport.delayDays || 8} days behind schedule</p>
+                <p className="text-xs text-[var(--muted)] mt-1">Predicted completion: {aiReport.predictedCompletion || 'Projected completion in the next review window'}</p>
               </div>
 
               {/* AI Recommendations */}
@@ -367,18 +339,12 @@ export default function Reports() {
                   <p className="text-sm font-medium m-0">AI Recommendations</p>
                 </div>
                 <ul className="space-y-1.5">
-                  <li className="flex items-start gap-2 text-sm">
-                    <i className="ti ti-checkbox text-[var(--success)] mt-0.5" />
-                    <span>Follow up on switchgear certification with vendor immediately</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm">
-                    <i className="ti ti-checkbox text-[var(--success)] mt-0.5" />
-                    <span>Consider alternate steel vendor or accelerate shipping</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm">
-                    <i className="ti ti-checkbox text-[var(--success)] mt-0.5" />
-                    <span>Approve resequencing of grading and permitting to recover delay days</span>
-                  </li>
+                  {(aiReport.recommendations || []).map((recommendation, index) => (
+                    <li key={`${recommendation}-${index}`} className="flex items-start gap-2 text-sm">
+                      <i className="ti ti-checkbox text-[var(--success)] mt-0.5" />
+                      <span>{recommendation}</span>
+                    </li>
+                  ))}
                 </ul>
               </div>
 
@@ -389,19 +355,18 @@ export default function Reports() {
                   <p className="text-sm font-medium m-0">Next Priority Actions</p>
                 </div>
                 <ol className="space-y-1.5 text-sm list-decimal list-inside">
-                  <li>Contact Voltage Systems Inc. for certification</li>
-                  <li>Review steel delivery options</li>
-                  <li>Schedule cooling tower commissioning</li>
-                  <li>Update project schedule with new milestones</li>
+                  {(aiReport.nextActions || []).map((action, index) => (
+                    <li key={`${action}-${index}`}>{action}</li>
+                  ))}
                 </ol>
               </div>
 
               <div className="flex gap-3 pt-2">
-                <Button className="flex-1 text-sm py-2 flex items-center justify-center gap-2">
+                <Button className="flex-1 text-sm py-2 flex items-center justify-center gap-2" onClick={() => handleReportAction('PDF')}>
                   <i className="ti ti-file-pdf" />
                   Download PDF
                 </Button>
-                <Button variant="outline" className="flex-1 text-sm py-2 flex items-center justify-center gap-2">
+                <Button variant="outline" className="flex-1 text-sm py-2 flex items-center justify-center gap-2" onClick={() => handleReportAction('Share')}>
                   <i className="ti ti-share" />
                   Share Report
                 </Button>

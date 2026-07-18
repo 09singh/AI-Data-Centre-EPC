@@ -15,12 +15,12 @@ const projectSchema = new mongoose.Schema(
 
     company: {
       type: String,
-      required: true,
+      default: "EPC Solutions",
     },
 
     location: {
       type: String,
-      required: true,
+      default: "Mumbai, India",
     },
 
     status: {
@@ -31,13 +31,54 @@ const projectSchema = new mongoose.Schema(
         "Completed",
         "On Hold",
       ],
-      default: "Planning",
+      default: "In Progress",
+    },
+
+    startDate: {
+      type: String,
+      default: "2026-01-15",
+    },
+
+    endDate: {
+      type: String,
+      default: "2026-12-15",
+    },
+
+    schedule: {
+      type: Array,
+      default: [],
+    },
+
+    vendors: {
+      type: Array,
+      default: [],
+    },
+
+    equipment: {
+      type: Array,
+      default: [],
+    },
+
+    commissioning: {
+      type: Object,
+      default: {
+        readinessScore: 0,
+        systems: [],
+        ncrData: [],
+        timeline: [],
+        aiRecommendations: [],
+      },
+    },
+
+    reports: {
+      type: Array,
+      default: [],
     },
 
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
     },
   },
   {

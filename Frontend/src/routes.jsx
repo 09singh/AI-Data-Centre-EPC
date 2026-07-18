@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
-import Register from './pages/Register'  // Add this
+import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import ProjectHub from './pages/ProjectHub'
 import AIProjectBrain from './pages/AIProjectBrain'
@@ -14,7 +14,7 @@ import Settings from './pages/Settings'
 import GlobalSearch from './pages/GlobalSearch'
 
 function ProtectedRoute({ children }) {
-  const { isLoggedIn, loading } = useAuth()
+  const { loading } = useAuth()
   
   if (loading) {
     return (
@@ -24,7 +24,7 @@ function ProtectedRoute({ children }) {
     )
   }
   
-  return isLoggedIn ? children : <Navigate to="/login" replace />
+  return children
 }
 
 export default function AppRoutes() {
@@ -32,7 +32,7 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />  // Add this
+      <Route path="/register" element={<Register />} />
       
       {/* Protected Routes */}
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

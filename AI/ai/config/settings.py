@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from typing import Optional
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Resolve the project root dynamically
@@ -111,6 +111,12 @@ class Settings(BaseSettings):
         default="openai/gpt-oss-20b",
         description="Name of the default Groq LLM model to execute"
     )
+
+    @field_validator("GROQ_MODEL_NAME")
+    @classmethod
+    def validate_groq_model_name(cls, value: str) -> str:
+        allowed_models = {"openai/gpt-oss-20b", "openai/gpt-oss-120b"}
+        return value if value in allowed_models else "openai/gpt-oss-20b"
     TEMPERATURE: float = Field(
         default=0.2,
         description="Sampling temperature for LLM generation"

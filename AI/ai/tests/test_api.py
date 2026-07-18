@@ -193,7 +193,7 @@ def test_chat_endpoint(mock_groq_completions):
             search_latency_seconds=0.02,
             llm_latency_seconds=0.08,
             token_usage=TokenUsage(prompt_tokens=100, completion_tokens=50, total_tokens=150),
-            model_name="meta-llama/llama-4-scout-17b-16e-instruct"
+            model_name="openai/gpt-oss-20b"
         )
     )
 

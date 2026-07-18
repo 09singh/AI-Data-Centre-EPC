@@ -44,14 +44,16 @@ export const searchAI = async (query, options = {}) => {
   }
 }
 
-export const getRiskAnalysis = async () => {
+export const getRiskAnalysis = async (projectId = null, projectData = null) => {
   try {
-    const response = await api.post('/ai/recommendation')
-    return response.data
+    const payload = projectId ? { projectId, project: projectData || null } : { project: projectData || null }
+    const response = await api.post('/ai/recommendation', payload)
+    return response.data.data || response.data
   } catch (error) {
     console.error('Risk analysis error:', error)
     return {
-      riskScore: 72,
+      projectName: projectData?.name || 'Selected Project',
+      healthScore: 72,
       predictedCompletion: 'Mar 14, 2027',
       delayDays: 18,
       risks: [
@@ -63,13 +65,15 @@ export const getRiskAnalysis = async () => {
   }
 }
 
-export const getComplianceResults = async () => {
+export const getComplianceResults = async (projectId = null, projectData = null) => {
   try {
-    const response = await api.post('/ai/compliance')
-    return response.data
+    const payload = projectId ? { projectId, project: projectData || null } : { project: projectData || null }
+    const response = await api.post('/ai/compliance', payload)
+    return response.data.data || response.data
   } catch (error) {
     console.error('Compliance error:', error)
     return {
+      projectName: projectData?.name || 'Selected Project',
       passRate: 85,
       passed: 17,
       failed: 3,
@@ -84,38 +88,32 @@ export const getComplianceResults = async () => {
   }
 }
 
-export const getSimulationResults = async (scenario) => {
+export const getSimulationResults = async (scenario, projectId = null, projectData = null) => {
   try {
-    const response = await api.post('/ai/reports', { scenario })
-    return response.data
+    const payload = { scenario, ...(projectId ? { projectId } : {}), ...(projectData ? { project: projectData } : {}) }
+    const response = await api.post('/ai/reports', payload)
+    return response.data.data || response.data
   } catch (error) {
     console.error('Simulation error:', error)
     return {
-      scenarios: [
-        {
-          name: 'Steel Delivery Delay',
-          description: 'What if steel delivery is delayed by 2 weeks?',
-          result: '5 day schedule impact · +2 critical path days'
-        },
-        {
-          name: 'Switchgear Shortage',
-          description: 'What if switchgear order is delayed by 1 month?',
-          result: '12 day schedule impact · +8 critical path days'
-        },
-        {
-          name: 'Accelerate Grading',
-          description: 'What if grading is accelerated by 1 week?',
-          result: 'Recovers 7 days · reduces overall delay by 40%'
-        }
-      ]
+      projectName: projectData?.name || 'Selected Project',
+      summary: 'Simulation service unavailable. Showing fallback scenario guidance.',
+      result: {
+        newCompletion: 'Projected completion in 2-3 weeks',
+        affectedMilestones: ['Critical path delivery', 'Testing window'],
+        criticalPathChanges: 'Potential schedule pressure based on the selected scenario.',
+        costImpact: '+40k estimated contingency',
+        recoverySuggestions: ['Re-sequence work', 'Add temporary labor', 'Fast-track approvals']
+      }
     }
   }
 }
 
-export const getRecommendations = async () => {
+export const getRecommendations = async (projectId = null, projectData = null) => {
   try {
-    const response = await api.post('/ai/recommendation')
-    return response.data
+    const payload = projectId ? { projectId, project: projectData || null } : { project: projectData || null }
+    const response = await api.post('/ai/recommendation', payload)
+    return response.data.data?.risks || response.data.data || response.data || []
   } catch (error) {
     console.error('Recommendations error:', error)
     return [

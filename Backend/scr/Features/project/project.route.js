@@ -6,9 +6,14 @@ const router = express.Router();
 
 router.post("/", auth, controller.createProject);
 
-router.get("/", auth, controller.getProjects);
+router.get("/", controller.getProjects);
 
-router.get("/:id", auth, controller.getProject);
+router.get("/:id/schedule", controller.getProjectSchedule);
+router.get("/:id/vendors", controller.getProjectVendors);
+router.get("/:id/equipment", controller.getProjectEquipment);
+router.get("/:id/commissioning", controller.getProjectCommissioning);
+router.get("/:id/reports", controller.getProjectReports);
+router.get("/:id", controller.getProject);
 
 router.put("/:id", auth, controller.updateProject);
 

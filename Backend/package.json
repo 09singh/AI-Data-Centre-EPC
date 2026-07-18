@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "node --watch server.js",
     "start": "node server.js",
+    "seed:data": "node seed-data.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio"

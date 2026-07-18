@@ -3,10 +3,13 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import Loader from '../components/Loader'
 import { Button } from '../components/Buttons'
+import { getComplianceResults, getRecommendations, getRiskAnalysis, getSimulationResults } from '../services/AIAPI'
+import { useProject } from '../context/ProjectContext'
 
 export default function AIIntelligence() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { selectedProject } = useProject()
   
   const getActiveTab = () => {
     const path = location.pathname
@@ -22,17 +25,35 @@ export default function AIIntelligence() {
   const [selectedScenario, setSelectedScenario] = useState('delayGenerator')
   const [simulationResult, setSimulationResult] = useState(null)
   const [simulating, setSimulating] = useState(false)
+  const [riskData, setRiskData] = useState(null)
+  const [complianceData, setComplianceData] = useState(null)
+  const [recommendationData, setRecommendationData] = useState([])
 
   useEffect(() => {
     setActiveTab(getActiveTab())
   }, [location.pathname])
+
+  useEffect(() => {
+    const loadAIData = async () => {
+      if (!selectedProject?._id) return
+      const [risksResponse, complianceResponse, recommendationsResponse] = await Promise.all([
+        getRiskAnalysis(selectedProject._id, selectedProject),
+        getComplianceResults(selectedProject._id, selectedProject),
+        getRecommendations(selectedProject._id, selectedProject)
+      ])
+      setRiskData(risksResponse)
+      setComplianceData(complianceResponse)
+      setRecommendationData(recommendationsResponse || [])
+    }
+    loadAIData()
+  }, [selectedProject?._id])
 
   const handleTabChange = (tab) => {
     navigate(`/ai-intelligence/${tab}`)
   }
 
   // Risk Data
-  const risks = [
+  const risks = (riskData?.risks || [
     {
       id: 'R-001',
       title: 'Generator Delivery Delay',
@@ -69,10 +90,21 @@ export default function AIIntelligence() {
       documents: ['vendor_submittals.pdf', 'procurement_tracker.xlsx'],
       status: 'Active'
     }
-  ]
+  ]).map((risk, index) => ({
+    id: risk.id || `R-${index + 1}`,
+    title: risk.title || risk.name || 'Project Risk',
+    severity: risk.severity || 'Medium',
+    riskScore: risk.riskScore || 60,
+    affectedPhase: risk.affectedPhase || 'Project',
+    description: risk.description || risk.summary || 'AI analysis completed.',
+    affectedTasks: risk.affectedTasks || ['Project Execution'],
+    mitigation: risk.mitigation || 'Review project controls.',
+    documents: risk.documents || [],
+    status: risk.status || 'Active'
+  }))
 
   // Compliance Documents
-  const complianceDocs = [
+  const complianceDocs = (complianceData?.items || [
     {
       id: 'C-001',
       name: 'UPS Specification.pdf',
@@ -106,7 +138,17 @@ export default function AIIntelligence() {
       aiExplanation: 'The cooling layout meets capacity requirements but lacks N+1 redundancy. This may impact system reliability during maintenance.',
       actions: ['Accept with Condition', 'Request Revision']
     }
-  ]
+  ]).map((item, index) => ({
+    id: item.id || `C-${index + 1}`,
+    name: item.name || `Compliance Item ${index + 1}`,
+    status: item.status === 'passed' ? 'Passed' : item.status === 'failed' ? 'Failed' : 'Warning',
+    description: item.description || 'Compliance status updated by AI.',
+    originalSpec: item.originalSpec || 'Project requirement',
+    submittedValue: item.submittedValue || 'Submitted value',
+    mismatch: item.mismatch || 'No mismatch detected',
+    aiExplanation: item.aiExplanation || 'AI review completed.',
+    actions: item.actions || ['Review', 'Accept']
+  }))
 
   // Simulation Scenarios
   const scenarios = [
@@ -116,66 +158,87 @@ export default function AIIntelligence() {
     { id: 'accelerateSteel', label: 'Accelerate Steel Erection' }
   ]
 
-  const runSimulation = (scenarioId) => {
+  const fallbackSimulationResults = {
+    delayGenerator: {
+      newCompletion: 'Mar 20, 2027',
+      affectedMilestones: ['Equipment Installation', 'Commissioning'],
+      criticalPathChanges: 'Generator installation becomes critical path. +5 days to project timeline.',
+      costImpact: '+$150,000 (expedited shipping and overtime)',
+      recoverySuggestions: [
+        'Add night shift for generator installation',
+        'Pre-assemble generator components off-site',
+        'Expedite civil works for generator foundation'
+      ],
+      before: { completion: 'Mar 14, 2027', timeline: 'On Track' },
+      after: { completion: 'Mar 20, 2027', timeline: 'Delayed by 6 days' }
+    },
+    changeVendor: {
+      newCompletion: 'Mar 16, 2027',
+      affectedMilestones: ['Procurement', 'Switchgear Installation'],
+      criticalPathChanges: 'Switchgear procurement from new vendor adds 2 days but improves reliability.',
+      costImpact: '+$50,000 (vendor change processing and requalification)',
+      recoverySuggestions: [
+        'Accelerate vendor qualification process',
+        'Request expedited shipping from new vendor',
+        'Start installation preparation in parallel'
+      ],
+      before: { completion: 'Mar 14, 2027', timeline: 'Vendor A - Active' },
+      after: { completion: 'Mar 16, 2027', timeline: 'Vendor B - Pending Approval' }
+    },
+    reduceWorkforce: {
+      newCompletion: 'Mar 28, 2027',
+      affectedMilestones: ['Equipment Installation', 'Testing', 'Commissioning'],
+      criticalPathChanges: 'Workforce reduction extends all installation phases by 14 days.',
+      costImpact: '-$200,000 (labor cost savings)',
+      recoverySuggestions: [
+        'Extend project timeline by 14 days',
+        'Prioritize critical path activities',
+        'Implement overtime for key trades'
+      ],
+      before: { completion: 'Mar 14, 2027', timeline: 'Full Workforce' },
+      after: { completion: 'Mar 28, 2027', timeline: 'Reduced Workforce - Extended Timeline' }
+    },
+    accelerateSteel: {
+      newCompletion: 'Mar 10, 2027',
+      affectedMilestones: ['Steel Erection', 'Structure Completion'],
+      criticalPathChanges: 'Steel erection accelerates by 4 days, creating buffer for downstream activities.',
+      costImpact: '+$80,000 (expedited steel delivery)',
+      recoverySuggestions: [
+        'Maintain acceleration momentum',
+        'Allocate freed resources to critical path',
+        'Update schedule dependencies'
+      ],
+      before: { completion: 'Mar 14, 2027', timeline: 'Steel on Critical Path' },
+      after: { completion: 'Mar 10, 2027', timeline: 'Steel Accelerated - Buffer Created' }
+    }
+  }
+
+  const normalizeSimulationResult = (result, scenarioId) => {
+    const fallback = fallbackSimulationResults[scenarioId] || fallbackSimulationResults.delayGenerator
+    const raw = result?.result || result?.data || result || fallback
+
+    return {
+      ...fallback,
+      ...raw,
+      projectName: raw.projectName || selectedProject?.name || 'Selected Project',
+      affectedMilestones: raw.affectedMilestones?.length ? raw.affectedMilestones : fallback.affectedMilestones,
+      recoverySuggestions: raw.recoverySuggestions?.length ? raw.recoverySuggestions : fallback.recoverySuggestions,
+      before: raw.before || fallback.before || { completion: 'Current', timeline: 'Pending' },
+      after: raw.after || fallback.after || { completion: raw.newCompletion || 'Projected', timeline: 'Pending' }
+    }
+  }
+
+  const runSimulation = async (scenarioId) => {
     setSimulating(true)
-    setTimeout(() => {
-      const results = {
-        'delayGenerator': {
-          newCompletion: 'Mar 20, 2027',
-          affectedMilestones: ['Equipment Installation', 'Commissioning'],
-          criticalPathChanges: 'Generator installation becomes critical path. +5 days to project timeline.',
-          costImpact: '+$150,000 (expedited shipping and overtime)',
-          recoverySuggestions: [
-            'Add night shift for generator installation',
-            'Pre-assemble generator components off-site',
-            'Expedite civil works for generator foundation'
-          ],
-          before: { completion: 'Mar 14, 2027', timeline: 'On Track' },
-          after: { completion: 'Mar 20, 2027', timeline: 'Delayed by 6 days' }
-        },
-        'changeVendor': {
-          newCompletion: 'Mar 16, 2027',
-          affectedMilestones: ['Procurement', 'Switchgear Installation'],
-          criticalPathChanges: 'Switchgear procurement from new vendor adds 2 days but improves reliability.',
-          costImpact: '+$50,000 (vendor change processing and requalification)',
-          recoverySuggestions: [
-            'Accelerate vendor qualification process',
-            'Request expedited shipping from new vendor',
-            'Start installation preparation in parallel'
-          ],
-          before: { completion: 'Mar 14, 2027', timeline: 'Vendor A - Active' },
-          after: { completion: 'Mar 16, 2027', timeline: 'Vendor B - Pending Approval' }
-        },
-        'reduceWorkforce': {
-          newCompletion: 'Mar 28, 2027',
-          affectedMilestones: ['Equipment Installation', 'Testing', 'Commissioning'],
-          criticalPathChanges: 'Workforce reduction extends all installation phases by 14 days.',
-          costImpact: '-$200,000 (labor cost savings)',
-          recoverySuggestions: [
-            'Extend project timeline by 14 days',
-            'Prioritize critical path activities',
-            'Implement overtime for key trades'
-          ],
-          before: { completion: 'Mar 14, 2027', timeline: 'Full Workforce' },
-          after: { completion: 'Mar 28, 2027', timeline: 'Reduced Workforce - Extended Timeline' }
-        },
-        'accelerateSteel': {
-          newCompletion: 'Mar 10, 2027',
-          affectedMilestones: ['Steel Erection', 'Structure Completion'],
-          criticalPathChanges: 'Steel erection accelerates by 4 days, creating buffer for downstream activities.',
-          costImpact: '+$80,000 (expedited steel delivery)',
-          recoverySuggestions: [
-            'Maintain acceleration momentum',
-            'Allocate freed resources to critical path',
-            'Update schedule dependencies'
-          ],
-          before: { completion: 'Mar 14, 2027', timeline: 'Steel on Critical Path' },
-          after: { completion: 'Mar 10, 2027', timeline: 'Steel Accelerated - Buffer Created' }
-        }
-      }
-      setSimulationResult(results[scenarioId] || results['delayGenerator'])
+    try {
+      const result = await getSimulationResults(scenarioId, selectedProject?._id || null, selectedProject)
+      setSimulationResult(normalizeSimulationResult(result, scenarioId))
+    } catch (error) {
+      console.error(error)
+      setSimulationResult(normalizeSimulationResult(null, scenarioId))
+    } finally {
       setSimulating(false)
-    }, 1500)
+    }
   }
 
   const getStatusBadge = (status) => {
@@ -364,7 +427,7 @@ export default function AIIntelligence() {
                             </div>
 
                             <div className="flex gap-2 pt-2">
-                              <Button className="text-sm px-4 py-1.5">View Related Reports</Button>
+                              <Button className="text-sm px-4 py-1.5" onClick={() => navigate('/reports')}>View Related Reports</Button>
                               <Button variant="outline" className="text-sm px-4 py-1.5" onClick={() => setSelectedRisk(null)}>
                                 Close
                               </Button>
