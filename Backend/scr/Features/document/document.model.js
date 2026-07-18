@@ -42,6 +42,11 @@ const documentSchema = new mongoose.Schema(
       default: "processing",
     },
 
+    aiDocumentId: {          // ← ADD THIS
+      type: String,
+      default: null,
+    },
+
     uploadedAt: {
       type: Date,
       default: Date.now,

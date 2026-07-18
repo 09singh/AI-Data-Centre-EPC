@@ -108,7 +108,7 @@ class Settings(BaseSettings):
         description="Maximum search duration query timeout in seconds"
     )
     GROQ_MODEL_NAME: str = Field(
-        default="meta-llama/llama-4-scout-17b-16e-instruct",
+        default="openai/gpt-oss-20b",
         description="Name of the default Groq LLM model to execute"
     )
     TEMPERATURE: float = Field(
@@ -143,3 +143,5 @@ class Settings(BaseSettings):
 
 # Instantiate settings as a singleton for import across modules
 settings = Settings()
+print(f"Loading .env from: {env_path}")
+print(f"GROQ_MODEL_NAME: {settings.GROQ_MODEL_NAME}")

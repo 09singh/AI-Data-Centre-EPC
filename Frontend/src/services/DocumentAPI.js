@@ -5,7 +5,6 @@ export const getDocuments = async () => {
     const response = await api.get("/documents");
     const documents = response.data.data || [];
     
-    // Map backend fields to frontend expected fields
     return documents.map(doc => ({
       id: doc._id,
       name: doc.originalName || doc.fileName || 'Unnamed Document',
@@ -19,6 +18,7 @@ export const getDocuments = async () => {
       fileName: doc.fileName,
       originalName: doc.originalName,
       documentId: doc.documentId,
+      aiDocumentId: doc.aiDocumentId,  // ← ADD THIS
       uploadedAt: doc.uploadedAt,
       storageUrl: doc.storageUrl
     }));

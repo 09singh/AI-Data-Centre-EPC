@@ -411,10 +411,23 @@ export default function ProjectHub() {
                     </div>
                   </div>
 
-                  <button className="flex items-center justify-center w-full gap-2 py-2 text-sm btn">
+                  <button 
+                    className="flex items-center justify-center w-full gap-2 py-2 text-sm btn"
+                    onClick={() => {
+                      if (!selectedDoc) return
+                      navigate('/ai-brain', { 
+                        state: { 
+                          documentId: selectedDoc.aiDocumentId || selectedDoc.documentId,  // ← Use aiDocumentId first
+                          documentName: selectedDoc.name,
+                          initialQuestion: `Tell me about ${selectedDoc.name}`
+                        }
+                      })
+                    }}
+                  >
                     <i className="text-sm ti ti-message-2" />
                     Ask AI about this document
                   </button>
+                  
                 </div>
               </div>
             ) : (

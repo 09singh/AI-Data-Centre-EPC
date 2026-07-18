@@ -15,36 +15,28 @@ export const uploadDocument = async (req) => {
     size: req.file.size,
     storageUrl: req.file.path,
     aiStatus: "processing",
+    aiDocumentId: null, // Add this field
   });
 
-
-    try {
-      await aiService.uploadDocument(req.file.path);
-      document.aiStatus = "indexed";
-      await document.save();
-      console.log(`✅ Document ${documentId} indexed in AI service`);
-    } catch (err) {
-      console.error(`❌ Failed to index document ${documentId}:`, err.message);
-      document.aiStatus = "failed";
-      await document.save();
-      // Don't throw - document is still saved, just not indexed
-    }
-
+  // ============= INDEX DOCUMENT IN AI SERVICE =============
   try {
-    await aiService.uploadDocument(
-      req.file.path,
-      document.documentId,
-      document.projectId
-    );
-
+    const aiResponse = await aiService.uploadDocument(req.file.path);
+    
+    // Store the AI document ID from the response
+    if (aiResponse && aiResponse.document_id) {
+      document.aiDocumentId = aiResponse.document_id;
+      console.log(`✅ AI Document ID: ${aiResponse.document_id}`);
+    }
+    
     document.aiStatus = "indexed";
     await document.save();
+    console.log(`✅ Document ${documentId} (${document.originalName}) indexed in AI service successfully`);
   } catch (err) {
+    console.error(`❌ Failed to index document ${documentId}:`, err.message);
     document.aiStatus = "failed";
     await document.save();
-
-    throw err;
   }
+  // ========================================================
 
   return document;
 };
@@ -61,4 +53,4 @@ export const getDocument = async (id) => {
 
 export const deleteDocument = async (id) => {
   return await Document.findByIdAndDelete(id);
-};
+};  

@@ -12,15 +12,22 @@ export const getAIHealth = async () => {
 }
 export const askAIManager = async (question, options = {}) => {
   try {
-    const response = await api.post('/ai/chat', { 
-      question,
-      ...options 
-    })
+    const payload = {
+      question: question,
+      session_id: options.session_id || `session_${Date.now()}`
+    }
+    
+    // Add filters if provided (for document context)
+    if (options.filters) {
+      payload.filters = options.filters
+    }
+    
+    const response = await api.post('/ai/chat', payload)
     return response.data
   } catch (error) {
     console.error('AI chat error:', error)
     return {
-      response: error.response?.data?.message || 'AI service unavailable. Using fallback response.',
+      response: error.response?.data?.message || 'AI service unavailable.',
       confidence: 0,
       citedSource: ''
     }
@@ -119,3 +126,19 @@ export const getRecommendations = async () => {
   }
 }
 
+export const askAIAboutDocument = async (documentId, question) => {
+  try {
+    const response = await api.post('/ai/chat', {
+      question: question,
+      filters: { document_id: documentId },
+      session_id: `doc_${documentId}_${Date.now()}`
+    })
+    return response.data
+  } catch (error) {
+    console.error('AI document chat error:', error)
+    return {
+      response: 'Failed to get AI insights for this document.',
+      citations: []
+    }
+  }
+}

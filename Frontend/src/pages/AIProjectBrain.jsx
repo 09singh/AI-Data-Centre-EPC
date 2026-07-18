@@ -1,100 +1,54 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'  // Add this
 import Layout from '../components/Layout'
 import { askAIManager, getAIHealth } from '../services/AIAPI'
 
-const POLL_SECONDS = 8
-
 export default function AIProjectBrain() {
-  const [messages, setMessages] = useState([
-    { from: 'user', text: 'Why is the procurement file showing errors?' },
-    {
-      from: 'ai',
-      text: 'Two switchgear orders are missing the certification field required by spec section 26-24.',
-      meta: '2 orders affected · flagged 8 min ago'
-    }
-  ])
+  const location = useLocation()
+  const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [health, setHealth] = useState(null)
-
-  const latestUserQuestion = useMemo(() => {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i]?.from === 'user') return messages[i].text
-    }
-    return ''
-  }, [messages])
+  const [docContext, setDocContext] = useState(null)
 
   const abortRef = useRef(null)
 
+  // Check if coming from document click
   useEffect(() => {
-    getAIHealth()
-      .then((res) => setHealth(res))
-      .catch(() => setHealth({ status: 'unavailable' }))
-  }, [])
+    if (location.state?.documentId && location.state?.initialQuestion) {
+      setDocContext({
+        documentId: location.state.documentId,
+        documentName: location.state.documentName
+      })
+      // Auto-send question about document
+      handleAutoDocumentQuestion(location.state.initialQuestion, location.state.documentId)
+    }
+  }, [location.state])
 
-  // Best-effort “real-time”: since backend has no chat-history endpoint,
-  // periodically ask the AI to refresh the latest response for the most
-  // recent user question.
-  useEffect(() => {
-    if (!latestUserQuestion) return
-
-    const id = setInterval(async () => {
-      try {
-        setIsSending(false) // keep UI from showing send state for polling
-        abortRef.current?.abort?.()
-        const controller = new AbortController()
-        abortRef.current = controller
-
-        const result = await askAIManager(latestUserQuestion, { signal: controller.signal })
-
-        setMessages((m) => {
-          // Replace the last AI message if one exists; otherwise append.
-          const lastIndex = [...m].reverse().findIndex((x) => x?.from === 'ai')
-          if (lastIndex >= 0) {
-            const idx = m.length - 1 - lastIndex
-            const next = [...m]
-            next[idx] = {
-              from: 'ai',
-              text: result.response,
-              meta: `Confidence ${Math.round(result.confidence * 100)}% · cites ${result.citedSource}`
-            }
-            return next
-          }
-          return [
-            ...m,
-            {
-              from: 'ai',
-              text: result.response,
-              meta: `Confidence ${Math.round(result.confidence * 100)}% · cites ${result.citedSource}`
-            }
-          ]
-        })
-      } catch {
-        // ignore polling errors to avoid disrupting chat
-      }
-    }, POLL_SECONDS * 1000)
-
-    return () => clearInterval(id)
-  }, [latestUserQuestion])
-
-  async function handleSend(e) {
-    e.preventDefault()
-    if (!input.trim()) return
-
-    const question = input
-    setInput('')
+  const handleAutoDocumentQuestion = async (question, documentId) => {
+    setMessages([{ from: 'user', text: question }])
     setIsSending(true)
-
-    setMessages((m) => [...m, { from: 'user', text: question }])
-
+    
     try {
-      const result = await askAIManager(question)
+      const result = await askAIManager(question, { 
+        filters: { document_id: documentId },
+        session_id: `doc_${documentId}_${Date.now()}`
+      })
       setMessages((m) => [
         ...m,
         {
           from: 'ai',
-          text: result.response,
-          meta: `Confidence ${Math.round(result.confidence * 100)}% · cites ${result.citedSource}`
+          text: result.response || result.data?.response || 'No response from AI',
+          meta: result.citations ? `${result.citations.length} citations found` : ''
+        }
+      ])
+    } catch (error) {
+      setMessages((m) => [
+        ...m,
+        {
+          from: 'ai',
+          text: 'Sorry, I could not process your question about this document.',
+          meta: 'Error occurred'
         }
       ])
     } finally {
@@ -102,42 +56,113 @@ export default function AIProjectBrain() {
     }
   }
 
+  useEffect(() => {
+    getAIHealth()
+      .then((res) => setHealth(res))
+      .catch(() => setHealth({ status: 'unavailable' }))
+  }, [])
+
+  async function handleSend(e) {
+    e.preventDefault()
+    if (!input.trim() || isSending) return
+
+    const question = input
+    setInput('')
+    setIsSending(true)
+
+    // If we have document context, include it in the query
+    const options = docContext?.documentId ? {
+      filters: { document_id: docContext.documentId },
+      session_id: `doc_${docContext.documentId}_${Date.now()}`
+    } : {}
+
+    setMessages((m) => [...m, { from: 'user', text: question }])
+
+    try {
+      const result = await askAIManager(question, options)
+      setMessages((m) => [
+        ...m,
+        {
+          from: 'ai',
+          text: result.response || result.data?.response || 'No response from AI',
+          meta: result.citations ? `${result.citations.length} citations found` : ''
+        }
+      ])
+    } catch (error) {
+      setMessages((m) => [
+        ...m,
+        {
+          from: 'ai',
+          text: 'Sorry, I encountered an error. Please try again.',
+          meta: 'Error occurred'
+        }
+      ])
+    } finally {
+      setIsSending(false)
+    }
+  }
+
+  // Clear document context when user asks a new question without document filter
+  const handleClearContext = () => {
+    setDocContext(null)
+  }
+
   return (
     <Layout>
-      <div className="flex h-[460px] -m-6">
-        <div className="w-[180px] border-r border-[var(--border)] p-3.5 flex-shrink-0">
+      <div className="flex h-[calc(100vh-200px)] -m-6 min-h-[400px]">
+        <div className="w-[180px] border-r border-[var(--border)] p-3.5 flex-shrink-0 overflow-y-auto">
           <p className="text-[11px] text-[var(--muted)] uppercase tracking-wide m-0 mb-2.5">
             Status
           </p>
           <div className="text-xs px-2 py-1.5 rounded-lg text-[var(--muted)] mb-1">
             AI: {health?.status || health?.healthy || (health ? 'ready' : 'checking...')}
           </div>
+          {docContext && (
+            <div className="text-xs px-2 py-1.5 rounded-lg bg-[var(--accent-soft)] text-[var(--accent)] mb-1">
+              <p className="m-0 font-medium">📄 Document Context</p>
+              <p className="m-0 text-[10px] truncate">{docContext.documentName}</p>
+              <button 
+                onClick={handleClearContext}
+                className="text-[10px] text-[var(--muted)] hover:text-[var(--text)] mt-1"
+              >
+                Clear context
+              </button>
+            </div>
+          )}
           <div className="text-[11px] text-[var(--muted)] leading-snug px-2 mt-3">
-            Polling refresh every {POLL_SECONDS}s (no backend history endpoint yet)
+            {messages.length > 0 ? `${messages.length} messages` : 'No messages yet'}
           </div>
         </div>
 
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1 min-h-0">
           <div className="flex flex-col flex-1 gap-3 p-4 overflow-y-auto">
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={`max-w-[70%] rounded-xl p-2.5 ${
-                  m.from === 'user'
-                    ? 'self-end bg-[var(--accent-soft)]'
-                    : 'self-start bg-[var(--panel)] border border-[var(--border)]'
-                }`}
-              >
-                <p className="m-0 text-sm">{m.text}</p>
-                {m.meta && <p className="text-xs text-[var(--danger)] m-0 mt-1.5">{m.meta}</p>}
+            {messages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-[var(--muted)]">
+                <i className="ti ti-robot text-4xl mb-3 opacity-50" />
+                <p className="text-sm m-0">Ask the AI manager anything about your project</p>
+                <p className="text-xs m-0 mt-1">Try: "What's the project status?" or "Tell me about recent changes"</p>
               </div>
-            ))}
+            ) : (
+              messages.map((m, i) => (
+                <div
+                  key={i}
+                  className={`max-w-[70%] rounded-xl p-2.5 ${
+                    m.from === 'user'
+                      ? 'self-end bg-[var(--accent-soft)]'
+                      : 'self-start bg-[var(--panel)] border border-[var(--border)]'
+                  }`}
+                >
+                  <p className="m-0 text-sm">{m.text}</p>
+                  {m.meta && <p className="text-xs text-[var(--muted)] m-0 mt-1.5">{m.meta}</p>}
+                </div>
+              ))
+            )}
           </div>
 
-          <form onSubmit={handleSend} className="flex gap-2 p-3 border-t border-[var(--border)]">
+          <form onSubmit={handleSend} className="flex gap-2 p-3 border-t border-[var(--border)] flex-shrink-0">
             <input
               className="flex-1 input"
-              placeholder="Ask the AI manager anything..."
+              placeholder={docContext ? `Ask about ${docContext.documentName}...` : "Ask the AI manager anything..."}
               value={input}
               disabled={isSending}
               onChange={(e) => setInput(e.target.value)}
@@ -152,4 +177,3 @@ export default function AIProjectBrain() {
     </Layout>
   )
 }
-
