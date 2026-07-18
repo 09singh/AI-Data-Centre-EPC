@@ -1,15 +1,15 @@
 import api from './api'
 
+
 export const getAIHealth = async () => {
   try {
     const response = await api.get('/ai/health')
     return response.data
   } catch (error) {
-    console.error('AI health error:', error)
+    console.warn('AI Health API not available')
     return { status: 'unavailable' }
   }
 }
-
 export const askAIManager = async (question, options = {}) => {
   try {
     const response = await api.post('/ai/chat', { 
@@ -118,3 +118,4 @@ export const getRecommendations = async () => {
     ]
   }
 }
+

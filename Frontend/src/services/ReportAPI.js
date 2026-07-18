@@ -5,11 +5,8 @@ export const getReports = async () => {
     const response = await api.get('/reports')
     return response.data
   } catch (error) {
-    console.error('Get reports error:', error)
-    return [
-      { title: 'Weekly risk and schedule summary', format: 'PDF' },
-      { title: 'Compliance audit trail', format: 'Excel' }
-    ]
+    console.warn('Reports API not available, showing empty state')
+    return [] // Return empty array
   }
 }
 
@@ -29,7 +26,7 @@ export const getReportById = async (id) => {
     return response.data
   } catch (error) {
     console.error('Get report error:', error)
-    throw error
+    return null
   }
 }
 
@@ -51,7 +48,7 @@ export const getCommissioningData = async () => {
     const response = await api.get('/commissioning')
     return response.data
   } catch (error) {
-    console.error('Commissioning data error:', error)
+    console.warn('Commissioning API not available, showing empty state')
     return null
   }
 }

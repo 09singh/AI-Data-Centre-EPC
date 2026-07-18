@@ -40,9 +40,47 @@ export default function ProjectHub() {
   }, [location.pathname])
 
   const handleUpload = async (file) => {
-    const result = await uploadDocument(file)
-    getDocuments().then(setDocuments)
-    return result
+    try {
+      // Get project ID from project data
+      let projectId = projectData?._id;
+      
+      if (!projectId) {
+        // Try to create a project first
+        try {
+          const { createProject } = await import('../services/ProjectAPI');
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          const newProject = await createProject({
+            name: 'Riverbend Data Centre',
+            company: 'EPC Solutions',
+            location: 'Mumbai, India',
+            status: 'In Progress',
+            description: 'Default project',
+            createdBy: user.id || null
+          });
+          projectId = newProject._id;
+          // Refresh project data
+          const updatedProject = await getProjectSummary();
+          setProjectData(updatedProject);
+          console.log('Created new project with ID:', projectId);
+        } catch (err) {
+          console.error('Failed to create project:', err);
+          alert('Please create a project first.');
+          return;
+        }
+      }
+      
+      console.log('Uploading document with projectId:', projectId);
+      
+      const result = await uploadDocument(file, projectId);
+      
+      // Refresh documents after upload
+      const updatedDocs = await getDocuments();
+      setDocuments(updatedDocs);
+      return result;
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert(error.response?.data?.message || 'Failed to upload document');
+    }
   }
 
   const handleTabChange = (tab) => {
