@@ -93,7 +93,6 @@
     padding: 8px 16px;
     font-size: 12px;
     font-weight: 400;
-    transition: all 0.2s;
   }
 
   .app-theme.blueprint .btn:hover {
@@ -154,7 +153,6 @@
     font-weight: 500;
     background: var(--accent);
     color: #ffffff;
-    transition: all 0.2s;
   }
 
   .btn:hover {
@@ -184,7 +182,6 @@
   .input:focus {
     outline: none;
     border-color: var(--accent);
-    ring: 2px solid var(--accent-soft);
   }
 
   .card {
@@ -224,4 +221,6 @@
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
+  
 }
+

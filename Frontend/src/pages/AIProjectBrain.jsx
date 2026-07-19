@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Layout from '../components/Layout'
 import { askAIManager, getAIHealth } from '../services/AIAPI'
@@ -10,10 +10,12 @@ export default function AIProjectBrain() {
   const [isSending, setIsSending] = useState(false)
   const [health, setHealth] = useState(null)
   const [docContext, setDocContext] = useState(null)
+  const autoQuestionSent = useRef(false)  // ← Use ref instead of state
 
   // Check if coming from document click
   useEffect(() => {
-    if (location.state?.documentId && location.state?.initialQuestion) {
+    if (location.state?.documentId && location.state?.initialQuestion && !autoQuestionSent.current) {
+      autoQuestionSent.current = true  // ← Mark as sent
       setDocContext({
         documentId: location.state.documentId,
         documentName: location.state.documentName
@@ -26,7 +28,7 @@ export default function AIProjectBrain() {
   const handleAutoDocumentQuestion = async (question, documentId) => {
     setMessages([{ from: 'user', text: question }])
     setIsSending(true)
-    
+
     try {
       const result = await askAIManager(question, { 
         filters: { document_id: documentId },
@@ -103,6 +105,7 @@ export default function AIProjectBrain() {
   // Clear document context when user asks a new question without document filter
   const handleClearContext = () => {
     setDocContext(null)
+    autoQuestionSent.current = false  // ← Reset for next document click
   }
 
   return (

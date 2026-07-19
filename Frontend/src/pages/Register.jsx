@@ -90,8 +90,8 @@ export default function Register() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--bg)] relative">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-[var(--accent-soft)] rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[var(--accent-soft)] rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-[var(--accent-soft)] rounded-full blur-3xl " />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[var(--accent-soft)] rounded-full blur-3xl delay-1000" />
       </div>
 
       <div className="relative w-full max-w-md mx-4">

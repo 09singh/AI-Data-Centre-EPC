@@ -28,8 +28,8 @@ export default function Landing() {
     <div className="app-theme min-h-screen overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-[var(--accent-soft)] rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[var(--accent-soft)] rounded-full blur-3xl animate-pulse delay-700" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-[var(--accent-soft)] rounded-full blur-3xl " />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[var(--accent-soft)] rounded-full blur-3xl delay-700" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-[var(--border)] rounded-full opacity-5 animate-spin-slow" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] border border-[var(--border)] rounded-full opacity-10 animate-spin-slow-reverse" />
       </div>
@@ -59,7 +59,7 @@ export default function Landing() {
         <div className="flex-1 flex flex-col justify-center py-12 lg:pr-12">
           {/* Animated badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] text-xs font-medium w-fit animate-bounce-slow">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] " />
             AI-Powered EPC Platform
           </div>
 
